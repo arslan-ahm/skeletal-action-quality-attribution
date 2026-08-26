@@ -37,6 +37,41 @@ from torch import nn
 from ..data.skeleton import NUM_JOINTS, adjacency
 
 
+def make_norm(kind: str, channels: int) -> nn.Module:
+    """Normalisation layer by name.
+
+    **This choice is not cosmetic and the repository has the measurement to prove
+    it.** The first version of this model used ``GroupNorm`` everywhere, on the
+    reasoning that batch statistics are noisy at a batch size of 32 and that a
+    batch-independent norm makes the latency benchmark at batch 1 mean the same
+    thing as training. That model *could not fit its own training set*: train
+    Spearman 0.10, validation ~0.
+
+    The cause is the interaction with the readout. GroupNorm normalises each
+    sample over ``(channel group, T, V)``, so it removes that sample's per-channel
+    scale at every layer -- and the readout is a global average pool over
+    ``(T, V)``, which reads precisely that scale. BatchNorm normalises over
+    ``(N, T, V)`` per channel, so *relative* differences between samples survive
+    to the pool. Yan et al. (2018) use BatchNorm; this is why, and it is a
+    stronger constraint than a stability preference.
+
+    Both are kept and both are reported in the ablation, because "GroupNorm
+    broke it" is a more useful statement with a number attached.
+
+    Args:
+        kind: ``"batch"`` or ``"group"``.
+        channels: Channel count.
+
+    Raises:
+        ValueError: on an unknown kind.
+    """
+    if kind == "batch":
+        return nn.BatchNorm2d(channels)
+    if kind == "group":
+        return nn.GroupNorm(min(4, channels), channels)
+    raise ValueError(f"Unknown norm {kind!r}; use 'batch' or 'group'")
+
+
 class SpatialGraphConv(nn.Module):
     """Partitioned graph convolution over the joint axis.
 
@@ -122,6 +157,7 @@ class STGCNBlock(nn.Module):
         dropout: float = 0.0,
         edge_importance: bool = True,
         residual: bool = True,
+        norm: str = "batch",
     ) -> None:
         super().__init__()
         if temporal_kernel % 2 == 0:
@@ -129,12 +165,8 @@ class STGCNBlock(nn.Module):
         pad = (temporal_kernel - 1) // 2
 
         self.gcn = SpatialGraphConv(in_channels, out_channels, adj, edge_importance)
-        # GroupNorm, not BatchNorm. Batch statistics over (N, T, V) are dominated
-        # by the frame axis, and at the batch sizes this project trains with
-        # (8-32 sequences) the running estimates are noisy enough to change the
-        # ranking of two runs. GroupNorm is batch-size independent, which also
-        # makes the latency benchmark at batch 1 mean the same thing as training.
-        self.norm1 = nn.GroupNorm(min(4, out_channels), out_channels)
+        # See make_norm: BatchNorm is load-bearing here, not a default.
+        self.norm1 = make_norm(norm, out_channels)
         self.act = nn.ReLU(inplace=True)
 
         temporal: list[nn.Module] = []
@@ -161,7 +193,7 @@ class STGCNBlock(nn.Module):
                 )
             )
         self.tcn = nn.Sequential(*temporal)
-        self.norm2 = nn.GroupNorm(min(4, out_channels), out_channels)
+        self.norm2 = make_norm(norm, out_channels)
         self.dropout = nn.Dropout(dropout) if dropout > 0 else nn.Identity()
 
         if not residual:
@@ -171,7 +203,7 @@ class STGCNBlock(nn.Module):
         else:
             self.residual = nn.Sequential(
                 nn.Conv2d(in_channels, out_channels, kernel_size=1, stride=(stride, 1)),
-                nn.GroupNorm(min(4, out_channels), out_channels),
+                make_norm(norm, out_channels),
             )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -218,6 +250,7 @@ class STGCNBackbone(nn.Module):
         dropout: float = 0.05,
         edge_importance: bool = True,
         num_joints: int = NUM_JOINTS,
+        norm: str = "batch",
     ) -> None:
         super().__init__()
         if len(channels) != len(strides):
@@ -228,11 +261,15 @@ class STGCNBackbone(nn.Module):
         if adj.shape[-1] != num_joints:
             raise ValueError(f"adjacency is for {adj.shape[-1]} joints, not {num_joints}")
 
-        # Input normalisation over the joint-coordinate axis. Applied as a
-        # GroupNorm over C*V so that each (joint, axis) gets its own affine term:
-        # ankles and wrists occupy very different coordinate ranges, and a single
-        # shared scale would let the largest-range joint dominate the first layer.
-        self.input_norm = nn.GroupNorm(1, in_channels * num_joints)
+        # Input normalisation over the flattened (coordinate, joint) axis, so
+        # each (joint, axis) gets its own statistics and affine term: ankles and
+        # wrists occupy very different coordinate ranges, and a shared scale
+        # would let the largest-range joint dominate the first layer.
+        self.input_norm = (
+            nn.BatchNorm1d(in_channels * num_joints)
+            if norm == "batch"
+            else nn.GroupNorm(1, in_channels * num_joints)
+        )
         self.num_joints = num_joints
 
         blocks: list[nn.Module] = []
@@ -248,6 +285,7 @@ class STGCNBackbone(nn.Module):
                     separable=separable,
                     dropout=dropout,
                     edge_importance=edge_importance,
+                    norm=norm,
                 )
             )
             prev = c

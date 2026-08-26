@@ -26,6 +26,8 @@ from __future__ import annotations
 import torch
 from torch import nn
 
+from .stgcn import make_norm
+
 
 class TemporalCNNTrunk(nn.Module):
     """Dilated 1-D convolutional trunk over flattened joint coordinates.
@@ -53,6 +55,7 @@ class TemporalCNNTrunk(nn.Module):
         kernel_size: int = 9,
         dilations: tuple[int, ...] = (1, 2, 4),
         dropout: float = 0.05,
+        norm: str = "batch",
     ) -> None:
         super().__init__()
         if kernel_size % 2 == 0:
@@ -61,12 +64,14 @@ class TemporalCNNTrunk(nn.Module):
             raise ValueError("channels and dilations must align")
         layers: list[nn.Module] = []
         prev = in_channels * num_joints
-        self.input_norm = nn.GroupNorm(1, prev)
+        self.input_norm = (
+            nn.BatchNorm1d(prev) if norm == "batch" else nn.GroupNorm(1, prev)
+        )
         for c, d in zip(channels, dilations, strict=True):
             layers += [
                 nn.Conv1d(prev, c, kernel_size, padding=d * (kernel_size - 1) // 2,
                           dilation=d),
-                nn.GroupNorm(min(4, c), c),
+                nn.BatchNorm1d(c) if norm == "batch" else nn.GroupNorm(min(4, c), c),
                 nn.ReLU(inplace=True),
                 nn.Dropout(dropout) if dropout > 0 else nn.Identity(),
             ]
@@ -108,10 +113,13 @@ class LSTMTrunk(nn.Module):
         layers: int = 2,
         bidirectional: bool = True,
         dropout: float = 0.05,
+        norm: str = "batch",
     ) -> None:
         super().__init__()
         feat = in_channels * num_joints
-        self.input_norm = nn.GroupNorm(1, feat)
+        self.input_norm = (
+            nn.BatchNorm1d(feat) if norm == "batch" else nn.GroupNorm(1, feat)
+        )
         self.lstm = nn.LSTM(
             feat,
             hidden,

@@ -25,8 +25,8 @@ import yaml
 class DataConfig:
     """Dataset size, generator settings and the splitting regime."""
 
-    num_sequences: int = 2000
-    num_frames: int = 64
+    num_sequences: int = 1400
+    num_frames: int = 48
     num_subjects: int = 24
     max_degradations: int = 3
     severity_min: float = 0.15
@@ -57,6 +57,7 @@ class ModelConfig:
     separable: bool = True
     edge_importance: bool = True
     dropout: float = 0.05
+    norm: str = "batch"
     uncertainty_weight: float = 0.5
     channels: tuple[int, ...] = ()
     strides: tuple[int, ...] = ()
@@ -66,7 +67,7 @@ class ModelConfig:
 class OptimConfig:
     """Optimisation schedule."""
 
-    epochs: int = 30
+    epochs: int = 20
     lr: float = 3e-3
     weight_decay: float = 1e-4
     grad_clip: float = 5.0
