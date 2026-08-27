@@ -130,7 +130,28 @@ python -m pytest tests -q                 # everything
 
 ## Compute, and what it costs the results
 
-<!-- TIMING_TABLE -->
+Measured on this machine, from the committed run artefacts
+(`results/runs/*/summary.json`):
+
+| stage | wall-clock | what it does |
+|---|---|---|
+| `compare` | 32.7 min | 5 neural arms + 12 DTW configurations + kinematic GBR + all statistics + attribution fidelity on 150 sequences x 5 models x 3 methods x 2 controls |
+| `seeds` | 7.4 min | 3 training runs of the default configuration |
+| `ablations` | 13.0 min | 9 single-variable variants at 8 epochs |
+| `splits` | 6.1 min | 3 training runs, one per splitting regime |
+| `data_efficiency` | ~10 min | 4 label budgets x 4 methods |
+| fast test suite | 1.4 min | 476 tests |
+| efficiency benchmark | ~3 min | 8 architectures x 2 batch sizes + the cost curve |
+
+**Total training time across all 20 committed runs: 39.5 minutes.** The longest
+single training run is the LSTM at 6.6 minutes — comfortably inside the
+20-minute per-run ceiling.
+
+Per-run times are *not* stable on this machine and should not be read as a
+benchmark: `saqa_stgcn` took 265.5 s in the `compare` stage and 142.5 s for the
+identical configuration in the `seeds` stage. The difference is contention from
+other jobs, and it is the reason the efficiency table (§1 of `docs/RESULTS.md`)
+reports an IQR next to every median.
 
 **The scale is a constraint, and it is visible in the results rather than hidden
 by them.** Four shared CPU cores and a 20-minute ceiling per training run mean:
