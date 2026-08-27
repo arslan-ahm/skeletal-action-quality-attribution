@@ -10,9 +10,11 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+import torch
 
 from ..config import Config
 from ..data.dataset import SequenceDataset
+from ..engine.trainer import predict
 from ..metrics.regression import per_item_absolute_error, regression_summary, spearman
 from ..metrics.stats import (
     Comparison,
@@ -22,6 +24,7 @@ from ..metrics.stats import (
     noise_scale,
     verdict,
 )
+from ..models.registry import build_model
 from .core import RunResult, Splits, evaluate_predictions, make_splits, run_single
 
 TABLES = Path("results/tables")
@@ -132,7 +135,32 @@ def method_comparison(
         runs[arch] = result
         rows.append({"method": arch, "family": "neural", **result.metrics})
 
+    # An untrained network with the same architecture. It is not a strawman: a
+    # random projection of movement amplitude already correlates with defect
+    # severity, so this arm can score a non-trivial Spearman, and any trained
+    # model that does not clear it has learned nothing that the architecture and
+    # the input statistics did not already provide. Cheap to run and easy to
+    # omit, which is exactly why it is here.
+    torch.manual_seed(cfg.run.seed + 999)
+    untrained = build_model(
+        arms[0], head=cfg.model.head, uncertainty=cfg.model.uncertainty,
+        num_bins=cfg.model.num_bins,
+    )
+    untrained_pred = predict(untrained, sp.test.coords, cfg.data.batch_size)
+    rows.append(
+        {
+            "method": "untrained_stgcn",
+            "family": "control",
+            **evaluate_predictions(
+                sp.test, untrained_pred["score"], untrained_pred.get("lower"),
+                untrained_pred.get("upper"), level=cfg.eval.interval_level,
+            ),
+            "params": float(sum(p.numel() for p in untrained.parameters())),
+        }
+    )
+
     baselines = fit_baselines(sp, cfg)
+    baselines["untrained_stgcn"] = untrained_pred
     for name in ("kinematic_gbr", "dtw_reference", "framewise_reference"):
         pred = baselines[name]
         rows.append(

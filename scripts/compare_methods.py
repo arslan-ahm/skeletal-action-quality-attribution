@@ -83,7 +83,8 @@ def main(argv: list[str] | None = None) -> int:
     print(table[[c for c in show if c in table.columns]].to_string(index=False))
 
     predictions = {name: r.pred["score"] for name, r in runs.items()}
-    for name in ("kinematic_gbr", "dtw_reference", "framewise_reference"):
+    for name in ("kinematic_gbr", "dtw_reference", "framewise_reference",
+                 "untrained_stgcn"):
         predictions[name] = baselines[name]["score"]
     tests = statistical_tests(splits.test, predictions, "dtw_reference",
                               cfg.eval.bootstrap, cfg.run.seed)
