@@ -1,6 +1,6 @@
 ![Python](https://img.shields.io/badge/Python-3.12-blue)
 ![PyTorch](https://img.shields.io/badge/PyTorch-2.13%20cpu-red)
-![Tests](https://img.shields.io/badge/tests-479%20passing-brightgreen)
+![Tests](https://img.shields.io/badge/tests-480%20passing-brightgreen)
 ![Params](https://img.shields.io/badge/params-0.067M-orange)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
@@ -263,7 +263,7 @@ scripts/            train, compare_methods, run_ablations, data_efficiency,
                     render_docs, report_tables, download_real, run_all
 notebooks/          01 data & ground truth · 02 train & compare · 03 ablations
                     & noise · 04 attribution & uncertainty · 05 Colab full scale
-tests/              479 tests
+tests/              480 tests
 docs/               METHOD.md · RESULTS.md · REPRODUCIBILITY.md
 results/            tables/ figures/ runs/ — the evidence, committed
 ```
