@@ -142,8 +142,47 @@ than re-rolling the seed". Deltas are against the reference DTW baseline, divide
 by the `sqrt(2) * sd` from the three-seed study in §5.
 
 <!-- table:verdicts -->
-_not measured_
+| method | value | reference_value | delta | noise_scale | ratio_to_noise | verdict |
+|---|---|---|---|---|---|---|
+| kinematic_gbr | 0.5968 | 0.4996 | 0.0973 | 0.1205 | 0.807 | inside noise |
+| framewise_reference | 0.4191 | 0.4996 | -0.0805 | 0.1205 | 0.6681 | inside noise |
+| saqa_stgcn | 0.3842 | 0.4996 | -0.1154 | 0.1205 | 0.9573 | inside noise |
+| lstm | 0.3569 | 0.4996 | -0.1427 | 0.1205 | 1.184 | suggestive |
+| stgcn_dense | 0.3507 | 0.4996 | -0.1489 | 0.1205 | 1.2354 | suggestive |
+| tcn | 0.3305 | 0.4996 | -0.1691 | 0.1205 | 1.403 | suggestive |
+| frame_average | 0.2381 | 0.4996 | -0.2615 | 0.1205 | 2.1695 | survives |
+| untrained_stgcn | -0.0547 | 0.4996 | -0.5543 | 0.1205 | 4.5996 | robust |
 <!-- /table -->
+
+**And this retracts the paired test's verdict.** §2.2 reports that every neural
+arm is *significantly* worse than the DTW baseline: the paired bootstrap
+intervals on the Spearman difference exclude zero. Placed against the run-to-run
+scale of 0.1205, that is **not** supportable:
+
+| comparison against `dtw_reference` | delta | ratio to noise | verdict |
+|---|---|---|---|
+| `saqa_stgcn` (ours) | -0.115 | 0.96x | **inside noise** |
+| `kinematic_gbr` | +0.097 | 0.81x | **inside noise** |
+| `framewise_reference` | -0.081 | 0.67x | **inside noise** |
+| `lstm` / `stgcn_dense` / `tcn` | -0.14 to -0.17 | 1.2-1.4x | suggestive |
+| `frame_average` | -0.261 | 2.17x | survives |
+| `untrained_stgcn` | -0.554 | 4.60x | robust |
+
+The two tests are not in conflict; they answer different questions. The paired
+bootstrap correctly reports that *these particular weights* rank worse than the
+DTW baseline consistently across the 250 test sequences. The seed study reports
+that re-rolling the seed moves Spearman by 0.12, which is as large as the gap.
+**The claim "this method is worse than the reference approach" is about the
+method, so the sampling unit is the training run, and there were three.**
+
+So the supportable reading of the whole comparison is narrow:
+
+* **Nothing separates** the DTW baseline, the kinematic GBR, the graph model, the
+  LSTM and the temporal CNN at this scale. Every pairwise gap among them is at or
+  below the run-to-run scale.
+* **Temporal structure matters:** frame-averaging is worse than everything with a
+  temporal model, at 2.17x the noise.
+* **Training matters:** every trained arm clears the untrained control at 4.6x.
 
 **What a paired test here does and does not say.** It conditions on **one
 trained model per method** and asks whether the difference is consistent across
@@ -330,7 +369,16 @@ batch order **and** the split, which is the conservative choice: it measures the
 variation a reader reproducing the pipeline would see.
 
 <!-- table:seeds -->
-_not measured_
+| metric | mean | sd | min | max | range | noise_scale | n_runs |
+|---|---|---|---|---|---|---|---|
+| spearman | 0.3585 | 0.0852 | 0.2634 | 0.428 | 0.1645 | 0.1205 | 3 |
+| kendall_tau | 0.2481 | 0.057 | 0.1849 | 0.2955 | 0.1106 | 0.0806 | 3 |
+| relative_l2 | 0.2456 | 0.0076 | 0.2368 | 0.2502 | 0.0134 | 0.0108 | 3 |
+| mae | 0.1466 | 0.0056 | 0.1415 | 0.1526 | 0.0111 | 0.008 | 3 |
+| coverage | 0.9134 | 0.0232 | 0.896 | 0.9398 | 0.0438 | 0.0328 | 3 |
+| mean_width | 0.5997 | 0.0127 | 0.5859 | 0.6109 | 0.025 | 0.018 | 3 |
+| aurc | 0.1411 | 0.0136 | 0.1269 | 0.154 | 0.0271 | 0.0192 | 3 |
+| error_auroc | 0.518 | 0.0365 | 0.4761 | 0.5431 | 0.067 | 0.0516 | 3 |
 <!-- /table -->
 
 Two independent runs differ with standard deviation `sqrt(2) * sd`. Any claimed
