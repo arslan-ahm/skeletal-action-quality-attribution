@@ -9,7 +9,30 @@ The machine that produced them is a **4-core Windows laptop with no GPU, capped
 to 2 torch threads, running other jobs at the same time.** That constraint is
 visible in the scale of these experiments and it is not hidden.
 
-<!-- SUMMARY -->
+**Read this first.** The headline experiment of this project — validating
+per-joint attribution against exact ground truth — returns a **negative result**,
+and a three-seed study **retracts** the significance verdict of the paired tests
+reported in §2.2. Both are stated where the claim was made rather than quietly
+restated at the end.
+
+The short version:
+
+* **Solid, because they are measurements or arithmetic rather than inferences:**
+  parameters/MACs/latency; the fitted `O(T²)` exponent of DTW against the model's
+  `O(T)`; zero crossed quantile intervals and zero ordinal rank inconsistencies;
+  89.6% coverage at nominal 90%; bit-identical reproducibility.
+* **The central experiment fails, robustly.** Attribution rank correlation with
+  the true cause is −0.24 to +0.01 for trained models, 0.001 for random, and
+  **+0.27 for the *untrained* control**. Across every architecture and every
+  attribution method.
+* **Two accuracy claims survive the noise:** temporal modelling beats
+  frame-averaging (2.17x), and training beats random weights (4.60x).
+* **No ranking among the five competitive methods survives** — every gap is
+  ≤1.4x the run-to-run scale of 0.1205, including this repository's model against
+  the reference DTW approach it was built to replace.
+* **The ordinal head does not deliver degradation monotonicity** (16.2% of
+  ordered pairs), which `docs/METHOD.md` predicted it would not guarantee.
+* **Predictive intervals do not support abstention** for any method here.
 
 ## What was run, and what was not
 
@@ -445,4 +468,81 @@ model's own terms.** It answers "what did this defect do to the movement", which
 is the right target for a coaching explanation, but a model could in principle
 score well on it while using different features internally.
 
-<!-- RETRACTIONS -->
+## 10. Retractions and negative results
+
+Collected in one place. Each is stated at the point of the claim as well.
+
+### 10.1 Retracted: "the neural arms are significantly worse than DTW"
+
+§2.2's paired bootstrap gives Spearman-difference intervals that exclude zero for
+every neural arm against `dtw_reference`. §2.2.1 shows the run-to-run scale is
+0.1205 and the `saqa_stgcn` gap is 0.115 — **0.96x the noise**. The paired test
+was computed correctly and answers a question about *two sets of weights*; the
+claim was about *methods*, whose sampling unit is the training run. The table is
+left intact and the retraction sits next to it.
+
+The same correction removes the opposite claim: the kinematic GBR's +0.097
+advantage over DTW is 0.81x the noise and is **not** evidence that handcrafted
+features beat the reference approach either.
+
+### 10.2 Negative: the attribution fidelity experiment failed
+
+The project's central claim was that per-joint, per-phase attribution could be
+*validated*. The harness works; the attributions do not. Trained-model
+attributions score at or below a random baseline, and below an untrained network,
+on every architecture and every method (§3.1). This is reported as the primary
+finding rather than buried, because a validation harness that detects a failure
+is worth more than one that never could have.
+
+### 10.3 Negative: the ordinal head buys rank consistency and nothing else
+
+Rank inconsistency is exactly 0, as designed and as `docs/METHOD.md` §4.4 states
+in advance. Degradation monotonicity — the property a *user* would care about —
+is violated on 11.5-29.0% of ordered severity pairs. The design note was written
+before the measurement and is unchanged by it; what changed is that the property
+is now quantified instead of hoped for.
+
+### 10.4 Negative: predictive intervals do not support abstention
+
+Coverage is good and crossings are zero, but `width_ratio_wrong_right` is
+0.998-1.015 and error-detection AUROC is 0.474-0.555 across **every** method,
+including the conformal baselines. The risk-coverage machinery is implemented and
+tested; on this task it has nothing to rank.
+
+### 10.5 Weakened: the efficiency claim against DTW is asymptotic, with a crossover
+
+DTW's fitted cost exponent is 1.98 and the model's MAC count is linear in ``T``
+(asserted by test). But at the 48 frames used throughout these experiments, the
+DTW baseline is **cheaper in wall-clock** than the graph model. The scaling
+advantage is real and it only pays off at longer sequences. The parameter and MAC
+reductions against the reference-scale ST-GCN (45x, 52x) are unaffected — those
+are architecture-to-architecture, not approach-to-approach.
+
+### 10.6 Design errors found and fixed during the build
+
+Kept because they are the kind of thing that silently invalidates results:
+
+* **GroupNorm made the model unable to fit its own training set** (train Spearman
+  0.147 vs 0.855). It removes the per-sample channel scale that global average
+  pooling reads. `docs/METHOD.md` §4.3.
+* **A generic `model.channels` in the config silently overrode the named
+  architectures**, collapsing three comparison arms into one identical model.
+  Visible only because their attribution scores matched to six decimals. Guarded
+  by `SHAPE_OWNING_ARCHITECTURES` and a regression test.
+* **The DTW baseline scored ρ = −0.12 before per-action calibration** and +0.44
+  after. Shipping the first number would have been a strawman comparison.
+* **The Sakoe-Chiba band was anchored off-diagonal**, making the distance
+  asymmetric for equal-length sequences. Caught by a symmetry test.
+* **`velocity_cosine` gave a non-zero self-distance** because the first frame's
+  velocity is zero by construction; two stationary joints were being scored as
+  maximally dissimilar.
+* **A full-repetition phase window still applied an edge taper**, which shifted a
+  range-of-motion defect's temporal mean and turned it partly into a posture
+  defect. Caught by a mean-preservation test.
+
+### 10.7 What would settle the open questions
+
+Five to ten seeds per configuration (tens of CPU-hours here, under an hour on a
+GPU), the reference-scale architectures actually trained, sequences at 192-300
+frames, and a real judge-scored dataset for the one question this design cannot
+answer at all. `notebooks/05_colab_full_scale.ipynb` targets exactly that.
