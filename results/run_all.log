@@ -156,3 +156,17 @@ uncertainty_heteroscedastic  0.353275       -0.006606                 0.054811  
 ======================================================================
 === stage: splits
 ======================================================================
+[splits] random
+[splits] subject
+[splits] combination
+
+=== split regimes (the gap is the leakage estimate) ===
+      split  spearman  kendall_tau  relative_l2      mae  coverage  n_train  n_test
+     random  0.333297     0.234389     0.266028 0.155598  0.832000    638.0   250.0
+    subject  0.384221     0.264127     0.249802 0.152609  0.896000    638.0   250.0
+combination  0.167893     0.114857     0.593639 0.264821  0.510101    682.0   198.0
+=== stage splits finished in 6.1 min (exit 0)
+
+======================================================================
+=== stage: data_efficiency
+======================================================================

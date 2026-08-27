@@ -113,6 +113,30 @@ arms.
 | untrained_stgcn | control | -0.0547 | -0.0358 | 0.6319 | 0.4353 | 1 | 1.4094 | 0.5552 | 66791 |
 <!-- /table -->
 
+### 2.0 Why the absolute numbers are modest: the model hedges
+
+A concrete, reproducible mechanism rather than a shrug. Across all three seeds
+the predictions use about **half** the label range:
+
+| seed | label sd | prediction sd | ratio | prediction range |
+|---|---|---|---|---|
+| 0 | 0.2005 | 0.0960 | 0.479 | [0.388, 0.892] |
+| 7 | 0.1889 | 0.0968 | 0.512 | [0.313, 0.874] |
+| 1337 | 0.1961 | 0.1052 | 0.537 | [0.374, 0.918] |
+
+The labels span [0.147, 1.000]; the model never predicts above 0.92 or below
+0.31. Its **worst per-combination error is on `clean` sequences (MAE 0.250)** —
+it will not commit to a perfect score. This is regression to the mean under a
+short schedule, and it is the direct cause of the relative-L2 numbers; it does
+*not* affect Spearman, which is scale-free, so the two metrics are telling
+different parts of the same story.
+
+It is also evidence that the arms are under-trained rather than saturated: the
+selected checkpoint was epoch **6-9 of 10** for every arm, i.e. validation
+Spearman was still improving when the schedule ended. The schedule was set by the
+compute budget, not by convergence, and that is a limitation of this study rather
+than a property of the methods.
+
 ### 2.1 The reference approach, given a fair fight
 
 Twelve DTW configurations — three distance functions x banded/unbanded x
