@@ -256,11 +256,27 @@ switched off, so a violation cannot be caused by a noise realisation.
 <!-- /table -->
 
 `rank_inconsistency` is a **structural** property of the shared-latent ordinal
-head and is 0 by construction; the independent-logit variant produces crossings
-on over half of all inputs
+head and is 0 for every arm, as the parameterisation guarantees; the
+independent-logit variant produces crossings on over half of all inputs
 (`test_independent_variant_does_produce_crossings`). `violation_rate` is the
-*empirical* property, and the head does not guarantee it — which is exactly why
-it is measured.
+*empirical* property, and the head does not guarantee it.
+
+**And it does not hold.** Between 11.5% and 29.0% of ordered severity pairs are
+violations — the model scored a *more degraded* execution *higher* — and between
+16.7% and 45.0% of individual executions contain at least one such reversal. The
+graph model sits at 16.2% of pairs and 35.0% of ladders.
+
+The violations are small in magnitude (`max_increase` 0.006-0.021, against a
+score range of 0.95), so this is hedging near the decision boundary rather than
+gross inversion. It is still a real defect for the stated use case: a system that
+sometimes rewards a worse execution cannot be put in front of a learner, however
+good its rank correlation is.
+
+**This is the difference between a guarantee and a hope, made measurable.** The
+ordinal head buys rank consistency — provably, and it is 0 — and buys nothing at
+all for degradation monotonicity. `docs/METHOD.md` §4.4 says so in advance; this
+table is what makes that statement checkable rather than a hedge written after
+the fact.
 
 ### 4.2 Intervals
 
@@ -283,6 +299,29 @@ Coverage alone cannot distinguish a useful interval from a constant-width one, s
 widens on the sequences the model gets wrong, which is the property that makes
 abstention work. `e_aurc` is AURC minus the oracle AURC, which separates "the
 confidence signal is good" from "the model is accurate".
+
+**Marginal calibration is good. Conditional calibration is worthless.** Those are
+two different claims and the table separates them:
+
+* **Good:** the graph model covers 89.6% of labels at a nominal 90%, the closest
+  of any arm, and **no method produces a single crossed interval** — the
+  non-crossing parameterisation does what it claims. The untrained control's
+  interval is 2.3x wider (1.409 against 0.602), so the width does at least track
+  gross incompetence.
+* **Negative, and it is robust:** `width_ratio_wrong_right` is 0.998-1.015 for
+  **every** method, and error-detection AUROC is 0.474-0.555 — chance. The
+  intervals carry essentially no information about *which* sequences the model
+  gets wrong. `e_aurc` (0.068-0.089) is comparable to `aurc_oracle` itself
+  (0.057-0.074), meaning the achievable improvement from a perfect confidence
+  signal is roughly as large as what the model achieves in total.
+
+**So the risk-coverage story does not work here**, and that applies to the
+conformal baselines exactly as much as to the quantile head — the DTW and
+framewise baselines have constant-width conformal intervals and score a ratio of
+exactly 1.000 by construction. The quantile head is *allowed* to vary its width
+with the input and essentially declines to. A system built on this should not
+offer selective abstention; it can offer a calibrated marginal interval and
+nothing more.
 
 ## 5. Seed variance — read this before any ablation
 
