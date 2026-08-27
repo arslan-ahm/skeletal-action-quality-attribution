@@ -506,14 +506,55 @@ larger than about 0.24 Spearman, and only one is.
 ## 7. Splits, and the leakage this repository measures rather than assumes
 
 <!-- table:splits -->
-_not measured_
+| split | spearman | kendall_tau | relative_l2 | mae | coverage | n_train | n_test |
+|---|---|---|---|---|---|---|---|
+| random | 0.3333 | 0.2344 | 0.266 | 0.1556 | 0.832 | 638 | 250 |
+| subject | 0.3842 | 0.2641 | 0.2498 | 0.1526 | 0.896 | 638 | 250 |
+| combination | 0.1679 | 0.1149 | 0.5936 | 0.2648 | 0.5101 | 682 | 198 |
 <!-- /table -->
 
-The gap between `random` and `subject` is the leakage estimate. A random split
-puts the same subject — same limb lengths, same style factor — on both sides;
-`combination` additionally holds out every multi-defect sequence containing a
-compensatory pattern, so the model must generalise to an interaction it has
-never seen.
+### 7.1 The subject-leakage gap did not appear
+
+The expectation was that `random` — which puts the same subject, with the same
+limb lengths and style factor, on both sides — would score *higher* than
+`subject`. **It does not.** `random` scores 0.333 against `subject`'s 0.384, a
+gap of −0.051, which is **0.42x the run-to-run scale and therefore inside the
+noise.**
+
+So this repository does **not** demonstrate subject leakage, and the expectation
+stated when the three regimes were designed is not supported. The most likely
+explanation is that the canonicalisation already removes most of what makes a
+subject identifiable — translation is subtracted and every sequence is divided by
+its own body-height estimate (`docs/METHOD.md` §3, and
+`test_canonicalise_scales_out_subject_size` measures the residual at <0.02 body
+heights between a 0.85x and a 1.20x subject). If so, the nuisance factor was
+handled by the representation rather than by the split. That is a plausible
+account, not a measured one, and it is not claimed as a finding.
+
+### 7.2 Cross-degradation generalisation fails, and the calibration fails with it
+
+The `combination` regime — where every multi-defect sequence containing a
+compensatory pattern is held out, so the model must score an *interaction* it has
+never seen — is a different story, and this one is robust:
+
+| metric | `subject` | `combination` | delta | ratio to noise | verdict |
+|---|---|---|---|---|---|
+| Spearman | 0.3842 | 0.1679 | −0.216 | 1.79x | suggestive |
+| relative L2 | 0.2498 | 0.5936 | +0.344 | 31.9x | **robust** |
+| coverage (nominal 0.90) | 0.8960 | 0.5101 | −0.386 | 11.8x | **robust** |
+
+**The most important number in this table is the coverage.** A predictive
+interval that covers 89.6% of labels in-distribution covers **51.0%** when the
+defect combination is unseen — a nominally 90% interval delivering barely half of
+that. The interval is calibrated to the training distribution and carries no
+warning at all when it leaves it.
+
+Taken with §4.2 — where the interval also fails to indicate *which* individual
+sequences are wrong — the uncertainty story of this repository is: marginal
+coverage is accurate exactly when it is least needed, and uninformative or
+actively misleading when it matters. That is a negative result about the
+formulation, not about this implementation of it: the conformal baselines share
+the first failure by construction.
 
 ## 8. Label efficiency
 
