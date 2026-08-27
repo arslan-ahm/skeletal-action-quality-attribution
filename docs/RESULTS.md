@@ -54,6 +54,7 @@ Being precise about this matters more than the numbers.
 | Component ablation, one variable at a time | **measured, shorter schedule** | `results/tables/ablation_components.csv` |
 | Leakage: random vs cross-subject vs cross-degradation | **measured** | `results/tables/split_comparison.csv` |
 | Label-budget curve | **measured** | `results/tables/data_efficiency.csv` |
+| Graph vs no-graph on `gait`, multi-seed follow-up | **measured** | `results/tables/gait_graph_probe.csv` |
 | **Accuracy of the 0.76M and 3.02M reference ST-GCNs** | **not run** — over the per-run budget | `notebooks/05_colab_full_scale.ipynb` |
 | Agreement with a human judge's score | **not possible here** — the label is synthetic | §7 |
 | Any real dataset | **not run** | `scripts/download_real.py` |

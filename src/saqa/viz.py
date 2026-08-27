@@ -195,17 +195,30 @@ def plot_skeleton_frames(sample, frames: tuple[int, ...] = (0, 8, 16, 24),
     plt = _plt()
     pos = np.asarray(sample.positions)
     frames = tuple(f for f in frames if f < pos.shape[0])
-    fig, axes = plt.subplots(1, len(frames), figsize=(3 * len(frames), 4), sharey=True)
+    fig, axes = plt.subplots(1, len(frames), figsize=(2.6 * len(frames), 4.2),
+                             sharey=True, sharex=True)
     axes = np.atleast_1d(axes)
+    # One set of limits for every panel, from the whole sequence. Per-panel
+    # autoscaling makes a squat and a stand look identical, which defeats the
+    # purpose of a motion figure.
+    z, y = pos[:, :, 2], pos[:, :, 1]
+    pad = 0.08
+    span = max(np.ptp(z), np.ptp(y)) / 2 + pad
+    zc, yc = (z.max() + z.min()) / 2, (y.max() + y.min()) / 2
     for ax, f in zip(axes, frames, strict=True):
-        for j, p in enumerate(PARENTS):
-            if p < 0:
+        for j, par in enumerate(PARENTS):
+            if par < 0:
                 continue
-            ax.plot([pos[f, p, 2], pos[f, j, 2]], [pos[f, p, 1], pos[f, j, 1]],
+            ax.plot([pos[f, par, 2], pos[f, j, 2]], [pos[f, par, 1], pos[f, j, 1]],
                     "-o", color="#2b6cb0", ms=3, lw=1.6)
         ax.set_title(f"frame {f}", fontsize=9)
         ax.set_aspect("equal")
+        ax.set_xlim(zc - span, zc + span)
+        ax.set_ylim(yc - span, yc + span)
+        ax.set_xticks([round(zc - span / 2, 1), round(zc + span / 2, 1)])
+        ax.tick_params(labelsize=7)
         ax.grid(alpha=0.25)
+    axes[0].set_ylabel("height (body heights)", fontsize=8)
     fig.suptitle(
         f"{sample.action}  |  quality {sample.quality:.2f}  |  "
         f"{sample.combination}", fontsize=11

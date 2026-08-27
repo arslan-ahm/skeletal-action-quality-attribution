@@ -211,6 +211,16 @@ def cost_curve_table(digits: int = 3) -> str:
     return to_markdown(df, ["num_frames", "dtw_total_ms", "model_ms", "speedup"], digits)
 
 
+def gait_probe_table(digits: int = 4) -> str:
+    """Graph vs graph-free per action class, over several seeds."""
+    df = read("gait_graph_probe.csv")
+    if df is None:
+        return "_not measured_"
+    cols = ["metric"] + [c for c in df.columns if c.endswith("_mean")] + [
+        "delta", "pooled_noise_scale", "ratio_to_noise", "verdict", "n_seeds"]
+    return to_markdown(df, cols, digits)
+
+
 def verdict_table(metric: str = "spearman", digits: int = 4) -> str:
     """Every method's gap to the reference, as a multiple of the noise scale."""
     df = read("method_verdicts.csv")
@@ -246,6 +256,7 @@ ALL = {
     "cost_curve": cost_curve_table,
     "per_action": per_action_table,
     "verdicts": verdict_table,
+    "gait_probe": gait_probe_table,
 }
 
 
