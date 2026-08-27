@@ -132,6 +132,13 @@ def _phase_mask(phase: np.ndarray, window: tuple[float, float]) -> np.ndarray:
     start, end = window
     if end <= start:
         return np.zeros_like(phase)
+    if start <= 0.0 and end >= 1.0:
+        # A whole-repetition window needs no taper, and must not have one: these
+        # actions are cyclic, so phase 0 and phase 1 are the same instant, and
+        # tapering there would both shift the trajectory's mean (turning a
+        # range-of-motion defect into a posture-offset defect) and inject a
+        # step into acceleration at every repetition boundary.
+        return np.ones_like(phase)
     inside = ((phase >= start) & (phase <= end)).astype(np.float64)
     taper = max(0.15 * (end - start), 1e-6)
     ramp_in = np.clip((phase - start) / taper, 0.0, 1.0)

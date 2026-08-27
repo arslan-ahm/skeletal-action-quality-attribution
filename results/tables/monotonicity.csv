@@ -1,7 +1,0 @@
-method,violation_rate,ladders_with_any_violation,max_increase,n_ladders,violation_rate__asymmetry,n__asymmetry,violation_rate__jerk,n__jerk,violation_rate__rom,n__rom,violation_rate__tempo,n__tempo,rank_inconsistency,n
-saqa_stgcn,0.9,1.0,0.0017232894897460938,4.0,0.6,1.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0,50.0
-stgcn_dense,0.9,1.0,0.0017232894897460938,4.0,0.6,1.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0,50.0
-stgcn_reference,0.9,1.0,0.0017232894897460938,4.0,0.6,1.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0,50.0
-tcn,0.325,0.75,0.00035822391510009766,4.0,0.6,1.0,0.2,1.0,0.0,1.0,0.5,1.0,0.0,50.0
-lstm,0.425,0.75,7.68899917602539e-05,4.0,1.0,1.0,0.2,1.0,0.0,1.0,0.5,1.0,0.0,50.0
-frame_average,0.475,0.5,0.0035032033920288086,4.0,0.9,1.0,1.0,1.0,0.0,1.0,0.0,1.0,0.0,50.0
