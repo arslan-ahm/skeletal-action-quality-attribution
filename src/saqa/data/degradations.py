@@ -338,9 +338,7 @@ def sample_degradations(
             dofs = tuple(str(d) for d in rng.choice(
                 spec.primary_dofs, size=min(2, len(spec.primary_dofs)), replace=False))
             out.append(Degradation(kind, sev, dofs, window))
-        elif kind == "tempo":
-            out.append(Degradation(kind, sev, (), (0.0, 1.0)))
-        elif kind == "instability":
+        elif kind == "tempo" or kind == "instability":
             out.append(Degradation(kind, sev, (), (0.0, 1.0)))
     return out
 

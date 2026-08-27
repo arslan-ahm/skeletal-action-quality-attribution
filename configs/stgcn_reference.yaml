@@ -1,0 +1,5 @@
+_base_: base.yaml
+model:
+  architecture: stgcn_reference
+run:
+  name: stgcn_reference

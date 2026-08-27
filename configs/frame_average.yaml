@@ -1,0 +1,5 @@
+_base_: base.yaml
+model:
+  architecture: frame_average
+run:
+  name: frame_average

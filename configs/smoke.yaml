@@ -1,0 +1,19 @@
+# End-to-end verification in about a minute. Real training, real metrics, tiny
+# scale. If this produces a populated table, the pipeline is wired correctly.
+_base_: base.yaml
+data:
+  num_sequences: 240
+  num_frames: 32
+  num_subjects: 8
+  batch_size: 16
+model:
+  channels: [12, 24, 32]
+  strides: [2, 2, 1]
+optim:
+  epochs: 3
+eval:
+  bootstrap: 200
+  ig_steps: 8
+  monotonicity_ladders: 6
+run:
+  name: smoke

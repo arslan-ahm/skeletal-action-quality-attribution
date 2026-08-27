@@ -1,0 +1,5 @@
+_base_: base.yaml
+model:
+  architecture: lstm
+run:
+  name: lstm

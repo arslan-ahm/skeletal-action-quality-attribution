@@ -1,0 +1,10 @@
+# Optional real-data path. Requires a manual download; see scripts/download_real.py.
+# Nothing in results/ was produced with this config -- it is not run locally.
+_base_: base.yaml
+data:
+  num_frames: 64
+  batch_size: 16
+optim:
+  epochs: 60
+run:
+  name: real_ntu

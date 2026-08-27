@@ -84,6 +84,12 @@ class EvalConfig:
     interval_level: float = 0.90
     attribution_methods: tuple[str, ...] = ("integrated_gradients", "occlusion", "gradient")
     ig_steps: int = 24
+    #: Cap on the number of test sequences scored for attribution fidelity.
+    #: Integrated gradients costs ``ig_steps`` forward-backward passes per
+    #: sequence per model, so the full test split across every arm would dominate
+    #: the compute budget. The cap is a *prefix of the shuffled test split*, and
+    #: the contributing count is reported next to every fidelity number.
+    attribution_limit: int = 150
     monotonicity_ladders: int = 60
     top_k_joints: int = 3
 

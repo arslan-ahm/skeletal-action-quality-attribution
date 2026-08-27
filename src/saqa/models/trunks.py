@@ -26,8 +26,6 @@ from __future__ import annotations
 import torch
 from torch import nn
 
-from .stgcn import make_norm
-
 
 class TemporalCNNTrunk(nn.Module):
     """Dilated 1-D convolutional trunk over flattened joint coordinates.
