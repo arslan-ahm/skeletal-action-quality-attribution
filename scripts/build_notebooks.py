@@ -22,11 +22,20 @@ ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "notebooks"
 
 HEADER = """import sys, pathlib
-sys.path.insert(0, str(pathlib.Path.cwd().parent / "src"))
+ROOT = pathlib.Path.cwd().parent
+sys.path.insert(0, str(ROOT / "src"))
 import numpy as np, pandas as pd, torch
 torch.set_num_threads(2)
 pd.set_option("display.width", 200)
 import matplotlib.pyplot as plt
+
+# Notebooks run with cwd=notebooks/, so the figure and table roots have to be
+# repointed at the repository's results/ tree. Without this every figure lands in
+# notebooks/results/figures/ and the committed figures silently never update.
+import saqa.viz as _viz, saqa.report as _report
+_viz.FIGURES = ROOT / "results" / "figures"
+_viz.TABLES = _report.TABLES = ROOT / "results" / "tables"
+tables = _viz.TABLES
 """
 
 
