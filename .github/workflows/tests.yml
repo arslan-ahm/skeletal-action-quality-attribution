@@ -38,3 +38,8 @@ jobs:
 
       - name: End-to-end smoke run
         run: uv run --no-project python scripts/train.py --config configs/smoke.yaml --no-analysis
+
+      - name: Documentation tables match their CSVs
+        # results/tables/ is committed, so a doc table that drifted from its
+        # artefact fails here rather than shipping.
+        run: uv run --no-project python scripts/render_docs.py --check
