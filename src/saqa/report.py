@@ -211,6 +211,18 @@ def cost_curve_table(digits: int = 3) -> str:
     return to_markdown(df, ["num_frames", "dtw_total_ms", "model_ms", "speedup"], digits)
 
 
+def verdict_table(metric: str = "spearman", digits: int = 4) -> str:
+    """Every method's gap to the reference, as a multiple of the noise scale."""
+    df = read("method_verdicts.csv")
+    if df is None:
+        return "_not measured_"
+    sub = df[df["metric"] == metric].sort_values("delta", ascending=False)
+    return to_markdown(
+        sub, ["method", "value", "reference_value", "delta", "noise_scale",
+              "ratio_to_noise", "verdict"], digits,
+    )
+
+
 def per_action_table(digits: int = 4) -> str:
     df = read("per_action.csv")
     if df is None:
@@ -233,6 +245,7 @@ ALL = {
     "data_efficiency": data_efficiency_table,
     "cost_curve": cost_curve_table,
     "per_action": per_action_table,
+    "verdicts": verdict_table,
 }
 
 

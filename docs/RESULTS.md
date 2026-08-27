@@ -102,6 +102,16 @@ and it is the number a careless implementation produces.
 _not measured_
 <!-- /table -->
 
+### 2.2.1 And is it bigger than the noise?
+
+The paired test above answers "is this difference consistent across test
+sequences". This one answers the question that actually matters: "is it bigger
+than re-rolling the seed". Deltas are against the reference DTW baseline, divided
+by the `sqrt(2) * sd` from the three-seed study in §5.
+
+<!-- table:verdicts -->
+<!-- /table -->
+
 **What a paired test here does and does not say.** It conditions on **one
 trained model per method** and asks whether the difference is consistent across
 test sequences — which it answers correctly. But "this method is better" treats
