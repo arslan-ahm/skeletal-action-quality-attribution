@@ -662,6 +662,26 @@ honest statement is: **at every label budget this study can afford, handcrafted
 kinematics beat the graph model.**
 
 
+## 8.1 A targeted follow-up: does the graph help where it should?
+
+The per-action breakdown in §2.3 contains the one mechanistically-motivated
+positive signal in this study. On `gait` — the only action class whose quality
+signal lives in *inter-limb coordination*, with the legs in anti-phase and the
+arms counter-swinging — the two graph models scored 0.557 and 0.498 while the
+graph-free temporal CNN and LSTM scored 0.036 and 0.117. That is exactly the
+structure a skeleton graph encodes and a flattened-joint model does not.
+
+With one run per arm that observation is an n of 1, and §6.2 found the graph
+contributing nothing measurable *overall*. So it was tested directly: several
+seeds of the graph model and of the temporal CNN, compared per action class
+against their pooled within-architecture spread.
+
+<!-- table:gait_probe -->
+_not measured_
+<!-- /table -->
+
+<!-- GAIT_READING -->
+
 ## 9. Limitations, and what would change them
 
 **The label is synthetic, and that bounds every accuracy claim here.** `w_k` is a
