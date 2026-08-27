@@ -140,7 +140,7 @@ Measured on this machine, from the committed run artefacts
 | `ablations` | 13.0 min | 9 single-variable variants at 8 epochs |
 | `splits` | 6.1 min | 3 training runs, one per splitting regime |
 | `data_efficiency` | ~10 min | 4 label budgets x 4 methods |
-| fast test suite | 1.4 min | 476 tests |
+| fast test suite | 0.9 min | 478 tests |
 | efficiency benchmark | ~3 min | 8 architectures x 2 batch sizes + the cost curve |
 
 **Total training time across all 20 committed runs: 39.5 minutes.** The longest

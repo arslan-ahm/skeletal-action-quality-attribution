@@ -1,6 +1,6 @@
 ![Python](https://img.shields.io/badge/Python-3.12-blue)
 ![PyTorch](https://img.shields.io/badge/PyTorch-2.13%20cpu-red)
-![Tests](https://img.shields.io/badge/tests-480%20passing-brightgreen)
+![Tests](https://img.shields.io/badge/tests-482%20passing-brightgreen)
 ![Params](https://img.shields.io/badge/params-0.067M-orange)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
@@ -165,7 +165,13 @@ of the identical configuration gives a run-to-run scale of **0.1205 Spearman**:
 * **Marginal calibration.** 89.6% coverage at a nominal 90%.
 * **Training beats random weights** at 4.6x the noise scale, and **temporal
   modelling beats frame-averaging** at 2.17x. Those are the only two accuracy
-  claims this study can support.
+  claims this study can support outright.
+* **Suggestive, and mechanistically predicted:** on `gait` — the one action class
+  whose quality signal is inter-limb coordination — the graph model beats the
+  graph-free temporal CNN by 0.323 Spearman at 1.83x the noise, with
+  **non-overlapping distributions across three seeds** (worst graph seed 0.465 vs
+  best CNN seed 0.355). It is the only class of five above the noise floor, and it
+  is the class the mechanism predicts. Three seeds is not a significance claim.
 * **The efficiency measurements**, which are measurements rather than inferences.
 * **Determinism.** Two separate invocations agree to 0.0 across 250 per-sequence
   scores.
@@ -393,7 +399,7 @@ scripts/            train, compare_methods, run_ablations, data_efficiency,
                     render_docs, report_tables, download_real, run_all
 notebooks/          01 data & ground truth · 02 train & compare · 03 ablations
                     & noise · 04 attribution & uncertainty · 05 Colab full scale
-tests/              480 tests
+tests/              482 tests
 docs/               METHOD.md · RESULTS.md · REPRODUCIBILITY.md
 results/            tables/ figures/ runs/ — the evidence, committed
 ```

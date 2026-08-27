@@ -677,10 +677,52 @@ seeds of the graph model and of the temporal CNN, compared per action class
 against their pooled within-architecture spread.
 
 <!-- table:gait_probe -->
-_not measured_
+| metric | saqa_stgcn_mean | tcn_mean | delta | pooled_noise_scale | ratio_to_noise | verdict | n_seeds |
+|---|---|---|---|---|---|---|---|
+| overall_spearman | 0.3585 | 0.2837 | 0.0748 | 0.0847 | 0.8833 | inside noise | 3 |
+| gait | 0.5577 | 0.2351 | 0.3225 | 0.1761 | 1.8321 | suggestive | 3 |
+| lunge | 0.3504 | 0.3061 | 0.0443 | 0.1441 | 0.3075 | inside noise | 3 |
+| overhead_press | 0.3454 | 0.2967 | 0.0487 | 0.1723 | 0.2824 | inside noise | 3 |
+| squat | 0.4828 | 0.4675 | 0.0154 | 0.1921 | 0.0799 | inside noise | 3 |
+| throw | 0.1498 | 0.2223 | -0.0725 | 0.1937 | 0.374 | inside noise | 3 |
 <!-- /table -->
 
-<!-- GAIT_READING -->
+**The signal is real enough to name and too small to bank.** `gait` is the only
+class of five where the graph model separates from the temporal CNN by more than
+the pooled within-architecture spread: +0.323 at **1.83x** the noise scale
+(*suggestive*). Every other class, and the overall score, sits at 0.08-0.88x —
+inside the noise.
+
+The per-seed numbers are cleaner than the ratio makes them sound, and worth
+reading directly:
+
+| seed | `saqa_stgcn` gait | `tcn` gait |
+|---|---|---|
+| 0 | 0.557 | 0.036 |
+| 7 | 0.465 | 0.315 |
+| 1337 | 0.651 | 0.355 |
+
+**The distributions do not overlap** — the graph model's worst seed (0.465) beats
+the temporal CNN's best (0.355). With three seeds per arm that is not a
+significance claim, but it is a different and stronger observation than a mean
+difference of comparable size would be.
+
+**Why this is the class where it should appear.** Gait is the only action here
+whose quality signal lives in *inter-limb coordination*: the legs swing in
+anti-phase (`test_gait_is_left_right_antiphase` measures the correlation at
+< −0.9) and the arms counter-swing. A graph convolution propagates along the
+skeleton and can represent that relation directly; a model that flattens joints
+into 51 independent channels has to learn it from scratch. The prediction was
+made from the mechanism before the measurement, and the measurement is on the
+predicted class rather than scattered across all five.
+
+**What it does not rescue.** This does not overturn §6.2, where removing the
+graph entirely (`partitions_identity`) cost nothing measurable overall. Both can
+be true: the graph helps on one class out of five, and that help is diluted below
+detectability when averaged over a test set where gait is a fifth of the
+sequences. The supportable claim is narrow and conditional — *on an action whose
+quality depends on inter-limb coordination, the graph structure appears to help*
+— and confirming it needs more seeds and a gait-only benchmark.
 
 ## 9. Limitations, and what would change them
 

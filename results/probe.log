@@ -1,2 +1,21 @@
 [probe] saqa_stgcn seed 0
 [probe] saqa_stgcn seed 7
+[probe] saqa_stgcn seed 1337
+[probe] tcn seed 0
+[probe] tcn seed 7
+[probe] tcn seed 1337
+architecture  seed  overall_spearman   gait  lunge  overhead_press  squat   throw
+  saqa_stgcn     0            0.3842 0.5567 0.3555          0.3630 0.5013  0.2595
+  saqa_stgcn     7            0.2634 0.4650 0.2695          0.4624 0.3193 -0.0725
+  saqa_stgcn  1337            0.4280 0.6513 0.4262          0.2107 0.6278  0.2625
+         tcn     0            0.3305 0.0363 0.4522          0.3506 0.5642  0.3012
+         tcn     7            0.2685 0.3146 0.2946          0.4071 0.2964  0.1111
+         tcn  1337            0.2521 0.3546 0.1714          0.1325 0.5418  0.2546
+
+          metric  saqa_stgcn_mean  tcn_mean   delta  pooled_noise_scale  ratio_to_noise      verdict  n_seeds
+overall_spearman           0.3585    0.2837  0.0748              0.0847          0.8833 inside noise        3
+            gait           0.5577    0.2351  0.3225              0.1761          1.8321   suggestive        3
+           lunge           0.3504    0.3061  0.0443              0.1441          0.3075 inside noise        3
+  overhead_press           0.3454    0.2967  0.0487              0.1723          0.2824 inside noise        3
+           squat           0.4828    0.4675  0.0154              0.1921          0.0799 inside noise        3
+           throw           0.1498    0.2223 -0.0725              0.1937          0.3740 inside noise        3
