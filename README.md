@@ -222,7 +222,7 @@ Full tables, statistical tests, the seed study, ablations and the retractions:
 Runs end to end with **no dataset download, no API keys, no network**.
 
 ```bash
-git clone https://github.com/HabibaSajid321/skeletal-action-quality-attribution
+git clone https://github.com/arslan-ahmad/skeletal-action-quality-attribution
 cd skeletal-action-quality-attribution
 
 uv python install 3.12
@@ -430,11 +430,11 @@ python scripts/train.py --config configs/saqa_stgcn.yaml \
 
 ```bibtex
 @software{sajid2026saqa,
-  author = {Habiba Sajid},
+  author = {Arslan Ahmad},
   title  = {What Should I Change? Reference-Free Calibrated Skeletal
             Action-Quality Regression with Validated Attribution},
   year   = {2026},
-  url    = {https://github.com/HabibaSajid321/skeletal-action-quality-attribution}
+  url    = {https://github.com/arslan-ahmad/skeletal-action-quality-attribution}
 }
 ```
 

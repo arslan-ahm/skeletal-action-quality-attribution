@@ -7,12 +7,12 @@ abstract: >-
   quantile intervals, and per-joint / per-phase attribution that is validated
   against exact ground truth from a procedural motion generator.
 authors:
-  - family-names: Sajid
-    given-names: Habiba
+  - family-names: Ahmad
+    given-names: Arslan
 version: 1.0.0
 date-released: 2026-08-27
 license: MIT
-repository-code: "https://github.com/HabibaSajid321/skeletal-action-quality-attribution"
+repository-code: "https://github.com/arslan-ahmad/skeletal-action-quality-attribution"
 keywords:
   - action quality assessment
   - skeleton

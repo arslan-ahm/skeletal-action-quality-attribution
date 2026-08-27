@@ -28,7 +28,7 @@ The committed results were produced with:
 ### Setup
 
 ```bash
-git clone https://github.com/HabibaSajid321/skeletal-action-quality-attribution
+git clone https://github.com/arslan-ahmad/skeletal-action-quality-attribution
 cd skeletal-action-quality-attribution
 
 uv python install 3.12
