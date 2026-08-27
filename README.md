@@ -17,7 +17,38 @@ estimate, a predictive interval, and a map of *which joints in which movement
 phase cost the quality*. Then it does the thing attribution work usually skips:
 **it measures whether that map is correct.**
 
-<!-- HEADLINE -->
+> **Result, up front — and it is not the flattering one.**
+>
+> **The measurement machinery works and the mechanism guarantees hold.**
+> Predicted quantiles never cross (0 crossings, all methods), the ordinal head's
+> rank-inconsistency rate is exactly 0, coverage is 89.6% against a nominal 90%,
+> and every trained arm clears an untrained-network control by 4.6x the
+> run-to-run noise.
+>
+> **The central attribution experiment returns a negative result.** Integrated
+> gradients, occlusion and input-gradient on the trained models all score *at or
+> below chance* against the exact ground truth (rank correlation −0.24 to +0.01,
+> versus 0.001 for a uniform-random attribution) — while the **same method
+> applied to an untrained network scores +0.27 and finds the single most
+> responsible joint 47.5% of the time against 0.0% for the trained model.** That
+> is the Adebayo et al. (2018) failure mode, and it is only visible because the
+> control was built in.
+>
+> **No method ranking survives the seed study.** A three-seed study puts the
+> run-to-run scale of a Spearman difference at 0.1205. Every gap among the DTW
+> baseline (0.500), the kinematic GBR (0.597), this repository's graph model
+> (0.384), the LSTM and the temporal CNN is at or below that. What does survive:
+> frame-averaging is worse than temporal modelling (2.17x noise), and training
+> beats random weights (4.6x). **This retracts the paired-bootstrap verdict**
+> reported alongside it, which called the neural arms significantly worse.
+>
+> **And the ordinal head does not deliver monotonicity** — 16.2% of ordered
+> severity pairs are scored the wrong way round — which is exactly what
+> `docs/METHOD.md` said it would not guarantee, now measured.
+>
+> The solid contributions here are a *validation harness for attribution that
+> actually detects failure*, and an honest efficiency characterisation. Details
+> and every retraction: [docs/RESULTS.md](docs/RESULTS.md).
 
 ---
 
@@ -78,7 +109,75 @@ _not measured_
 
 ## Results
 
-<!-- RESULTS_SUMMARY -->
+Five neural arms and three baselines, one dataset, one training loop, one seed;
+1000 sequences at 48 frames, cross-subject split, 250 test sequences.
+
+<!-- table:method -->
+| method | family | spearman | kendall_tau | relative_l2 | mae | coverage | mean_width | error_auroc | params |
+|---|---|---|---|---|---|---|---|---|---|
+| kinematic_gbr | baseline | **0.5968** | 0.4271 | **0.214** | 0.1289 | 0.88 | 0.5693 | 0.5398 | n/a |
+| dtw_reference | baseline | 0.4996 | 0.3467 | 0.2407 | 0.1452 | 0.864 | 0.5396 | 0.4744 | n/a |
+| framewise_reference | baseline | 0.4191 | 0.295 | 0.2524 | 0.1512 | 0.868 | 0.5703 | 0.5193 | n/a |
+| saqa_stgcn | neural | 0.3842 | 0.2641 | 0.2498 | 0.1526 | 0.896 | 0.6021 | 0.5347 | 66791 |
+| lstm | neural | 0.3569 | 0.2423 | 0.2498 | 0.1561 | 0.8 | 0.6037 | 0.4985 | 1.60e+05 |
+| stgcn_dense | neural | 0.3507 | 0.238 | 0.2518 | 0.1541 | 0.86 | 0.6309 | 0.5086 | 1.94e+05 |
+| tcn | neural | 0.3305 | 0.2281 | 0.2521 | 0.1557 | 0.864 | 0.5768 | 0.5491 | 1.23e+05 |
+| frame_average | neural | 0.2381 | 0.1633 | 0.2626 | 0.16 | 0.932 | 0.5999 | 0.4971 | 25965 |
+| untrained_stgcn | control | -0.0547 | -0.0358 | 0.6319 | 0.4353 | 1 | 1.4094 | 0.5552 | 66791 |
+<!-- /table -->
+
+**Read the ranking against the noise, not down the column.** A three-seed study
+of the identical configuration gives a run-to-run scale of **0.1205 Spearman**:
+
+<!-- table:verdicts -->
+| method | value | reference_value | delta | noise_scale | ratio_to_noise | verdict |
+|---|---|---|---|---|---|---|
+| kinematic_gbr | 0.5968 | 0.4996 | 0.0973 | 0.1205 | 0.807 | inside noise |
+| framewise_reference | 0.4191 | 0.4996 | -0.0805 | 0.1205 | 0.6681 | inside noise |
+| saqa_stgcn | 0.3842 | 0.4996 | -0.1154 | 0.1205 | 0.9573 | inside noise |
+| lstm | 0.3569 | 0.4996 | -0.1427 | 0.1205 | 1.184 | suggestive |
+| stgcn_dense | 0.3507 | 0.4996 | -0.1489 | 0.1205 | 1.2354 | suggestive |
+| tcn | 0.3305 | 0.4996 | -0.1691 | 0.1205 | 1.403 | suggestive |
+| frame_average | 0.2381 | 0.4996 | -0.2615 | 0.1205 | 2.1695 | survives |
+| untrained_stgcn | -0.0547 | 0.4996 | -0.5543 | 0.1205 | 4.5996 | robust |
+<!-- /table -->
+
+### What survives
+
+* **The structural guarantees, because they are arithmetic.** Zero crossed
+  quantile intervals and zero ordinal rank inconsistencies across every arm; the
+  independent-logit variant, shipped as a control, crosses on >50% of inputs.
+* **Marginal calibration.** 89.6% coverage at a nominal 90%.
+* **Training beats random weights** at 4.6x the noise scale, and **temporal
+  modelling beats frame-averaging** at 2.17x. Those are the only two accuracy
+  claims this study can support.
+* **The efficiency measurements**, which are measurements rather than inferences.
+* **Determinism.** Two separate invocations agree to 0.0 across 250 per-sequence
+  scores.
+
+### What does not
+
+* **Any ranking among the DTW baseline, the kinematic GBR, the graph model, the
+  LSTM and the temporal CNN.** All gaps ≤1.4x the run-to-run scale. In
+  particular this repository's model does **not** demonstrate an advantage over
+  the reference approach it was built to replace — and the handcrafted-feature
+  baseline's apparent 0.10 lead over DTW is equally inside the noise.
+* **The attribution fidelity claim**, which is the project's central experiment.
+  It fails its own sanity check, robustly, across every architecture and method.
+* **Degradation monotonicity**, at 11.5-29.0% of ordered pairs.
+* **Selective abstention.** Interval width carries no information about which
+  sequences are wrong — error-detection AUROC 0.474-0.555 for *every* method,
+  baselines included.
+
+### The efficiency claim, stated precisely
+
+The graph model is 45x smaller and 52x cheaper in MACs than the reference-scale
+ST-GCN it is modelled on. Against the *DTW baseline*, the honest statement is
+asymptotic and has a crossover: DTW is `O(T²)` and measurably so (fitted
+exponent 1.98), the model is `O(T)` in MACs (asserted by test), **but at the 48
+frames these experiments use, DTW is the cheaper of the two in wall-clock.** The
+scaling advantage only pays off on longer sequences. Anyone quoting a speed-up
+here without the sequence length attached is quoting the wrong number.
 
 Full tables, statistical tests, the seed study, ablations and the retractions:
 **[docs/RESULTS.md](docs/RESULTS.md)**
