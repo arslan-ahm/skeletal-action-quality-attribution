@@ -290,6 +290,14 @@ deviation clearly and everything below it poorly.
 adjacency mask, scores -0.22. It is also a *global* quantity and cannot explain a
 single sequence, so it is reported separately and never scored as if it could.
 
+**It is not an implementation bug.** Integrated gradients satisfies its own
+completeness axiom on these models to within a mean absolute residual of
+**8.7e-4** (max 4.9e-3) at 24 steps, against a score range of 0.95
+(`results/tables/ig_completeness.csv`). The attributions sum to what they are
+supposed to sum to; they are simply pointing at the wrong joints. Three methods
+with different failure modes -- a path integral, a forward-pass occlusion, and a
+single gradient -- agree, and the occlusion method uses no gradients at all.
+
 **What this does not say.** It does not say integrated gradients is a bad method,
 and it does not say the ground truth is wrong — the ground truth is exact by
 construction and is concentrated rather than uniform (top-3 joint mass 0.49
