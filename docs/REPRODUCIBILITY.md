@@ -65,7 +65,17 @@ This trains the same configuration twice in separate model instances and asserts
 
 Determinism evidence measured on the committed run:
 
-<!-- DETERMINISM_EVIDENCE -->
+| check | result |
+|---|---|
+| Two separate `run_single` invocations, identical config | **max abs difference 0.0** over every per-sequence score |
+| `generate_sample(i)` called twice | bit-identical positions, quality and attribution truth |
+| `adjacency("spatial")` called twice | bit-identical |
+| `subject_limb_scale(rng(42))` called twice | bit-identical |
+
+Asserted by `test_two_identical_runs_are_bit_identical`,
+`test_sample_is_a_pure_function_of_its_index`, `test_adjacency_is_deterministic`
+and `test_subject_limb_scale_is_deterministic_per_seed`, all of which run in the
+fast suite.
 
 The data generator is deterministic independently of torch: every sample is a
 pure function of one integer and the generator config
