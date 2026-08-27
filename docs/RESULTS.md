@@ -549,6 +549,23 @@ defect combination is unseen — a nominally 90% interval delivering barely half
 that. The interval is calibrated to the training distribution and carries no
 warning at all when it leaves it.
 
+The failure is structured, not random. Coverage falls monotonically with the
+number of simultaneous unseen defects (`results/runs/split_combination/per_item.csv`):
+
+| held-out combination | n | coverage | MAE |
+|---|---|---|---|
+| `compensation+instability` | 28 | 0.714 | 0.176 |
+| `asymmetry+compensation` | 23 | 0.565 | 0.219 |
+| `compensation+instability+rom` | 7 | 0.429 | 0.312 |
+| `asymmetry+compensation+jerk` | 10 | 0.300 | 0.401 |
+| `asymmetry+compensation+rom` | 10 | **0.000** | 0.487 |
+
+Ten sequences where the nominally 90% interval contains the true score **zero
+times**, and the interval width does not grow to compensate. The model's error
+grows with the number of co-occurring unseen defects and its stated uncertainty
+does not move — which is the worst possible combination for a system meant to
+know when to decline.
+
 Taken with §4.2 — where the interval also fails to indicate *which* individual
 sequences are wrong — the uncertainty story of this repository is: marginal
 coverage is accurate exactly when it is least needed, and uninformative or
