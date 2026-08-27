@@ -170,3 +170,28 @@ combination  0.167893     0.114857     0.593639 0.264821  0.510101    682.0   19
 ======================================================================
 === stage: data_efficiency
 ======================================================================
+[data-eff] saqa_stgcn @ n_train=100
+[data-eff] tcn @ n_train=100
+[data-eff] frame_average @ n_train=100
+[data-eff] kinematic_gbr @ n_train=100
+[data-eff] saqa_stgcn @ n_train=250
+[data-eff] tcn @ n_train=250
+[data-eff] frame_average @ n_train=250
+[data-eff] kinematic_gbr @ n_train=250
+[data-eff] saqa_stgcn @ n_train=500
+[data-eff] tcn @ n_train=500
+[data-eff] frame_average @ n_train=500
+[data-eff] kinematic_gbr @ n_train=500
+[data-eff] saqa_stgcn @ n_train=638
+[data-eff] tcn @ n_train=638
+[data-eff] frame_average @ n_train=638
+[data-eff] kinematic_gbr @ n_train=638
+
+=== Spearman against labelled-sequence budget ===
+method   frame_average  kinematic_gbr  saqa_stgcn     tcn
+n_train                                                  
+100             0.0253         0.2624      0.0113  0.0984
+250             0.0472         0.4075      0.3092  0.2273
+500             0.1887         0.6173      0.3658  0.3030
+638             0.2381         0.5968      0.3842  0.3305
+EXIT=0

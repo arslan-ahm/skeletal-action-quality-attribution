@@ -579,8 +579,36 @@ Reference-free quality assessment needs a human-scored corpus, and the scoring i
 the expensive part. This is the practically important efficiency axis.
 
 <!-- table:data_efficiency -->
-_not measured_
+| n_train | frame_average | kinematic_gbr | saqa_stgcn | tcn |
+|---|---|---|---|---|
+| 100 | 0.0253 | 0.2624 | 0.0113 | 0.0984 |
+| 250 | 0.0472 | 0.4075 | 0.3092 | 0.2273 |
+| 500 | 0.1887 | 0.6173 | 0.3658 | 0.303 |
+| 638 | 0.2381 | 0.5968 | 0.3842 | 0.3305 |
 <!-- /table -->
+
+**The handcrafted-feature baseline dominates at every budget**, and the gap is
+widest where it matters most: at 100 labelled sequences it reaches Spearman
+0.262 while the graph model manages **0.011** -- indistinguishable from nothing.
+The neural arms need roughly 250 labels to reach what the feature baseline gets
+from 100, and at 638 they have still not caught it.
+
+That ordering is not surprising and it is not a criticism of learned features in
+general. The kinematic feature set was written *with the degradation taxonomy in
+hand* (`docs/METHOD.md` section 5): joint-angle ranges for range-of-motion
+defects, left-right differences for asymmetry, dimensionless jerk for smoothness,
+pelvis path length for stability. It is being handed the vocabulary of the label
+function, and forty-odd such features with a gradient-boosted regressor is a
+strong estimator at these sample sizes. The learned models must discover the same
+structure from 100-638 examples, and at this budget they do not.
+
+**What the curve says about the future is limited, and worth stating rather than
+extrapolating.** All four methods are still rising at 638, so none has plateaued;
+that is consistent with the neural arms closing the gap given more labels, and
+equally consistent with them not. This study cannot distinguish the two. The
+honest statement is: **at every label budget this study can afford, handcrafted
+kinematics beat the graph model.**
+
 
 ## 9. Limitations, and what would change them
 
