@@ -216,7 +216,10 @@ batch statistics are noisy at batch size 32 and that a batch-independent norm
 makes a batch-1 latency benchmark mean the same thing as training.
 
 **That model could not fit its own training set** — train Spearman 0.147 against
-0.855 for the BatchNorm version, measured on identical data and schedule.
+0.855 for the BatchNorm version, on identical data, schedule and seed (600
+sequences, 64 frames, 25 epochs, temporal CNN trunk). The `norm_group` row of the
+ablation table in `docs/RESULTS.md` repeats the comparison like-for-like at the
+shipped configuration.
 
 The cause is an interaction with the readout. GroupNorm normalises each sample
 over `(channel group, T, V)`, removing that sample's per-channel scale at every
