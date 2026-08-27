@@ -195,7 +195,10 @@ The reference ST-GCN block applies a dense `(kt, 1)` temporal convolution costin
 `kt = 9` this removes roughly a factor of `kt` from the temporal stage.
 
 `stgcn_dense` is the *identical* architecture with `separable=False`, so the
-ablation isolates separability from width and depth. It is also the **trained**
+ablation isolates separability from width and depth. **Measured:** it costs 2.9x
+the parameters for a Spearman delta of −0.009, which is 0.07x the run-to-run
+noise scale — the separable stage is much cheaper at no cost this study can
+detect. It is also the **trained**
 stand-in for the dense-temporal-convolution design of the reference lineage:
 2.9x the parameters of ours, 2.6x the MACs, same graph, same head, same
 schedule, same data, same seed.
