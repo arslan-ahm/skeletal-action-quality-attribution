@@ -1,0 +1,40 @@
+name: tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    env:
+      OMP_NUM_THREADS: "2"
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+
+      - name: Pin Python 3.12
+        run: uv python install 3.12
+
+      - name: Create the environment
+        run: |
+          uv venv --python 3.12 .venv
+          uv pip install --index-url https://download.pytorch.org/whl/cpu --extra-index-url https://pypi.org/simple torch
+          uv pip install numpy scipy pandas scikit-learn pyyaml matplotlib pytest ruff
+          uv pip install -e . --no-deps
+
+      - name: Lint
+        run: uv run --no-project ruff check src scripts tests
+
+      - name: Fast tests
+        run: uv run --no-project python -m pytest tests -q -m "not slow"
+
+      - name: End-to-end smoke run
+        run: uv run --no-project python scripts/train.py --config configs/smoke.yaml --no-analysis

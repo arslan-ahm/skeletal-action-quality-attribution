@@ -1,0 +1,52 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "Skeletal Action-Quality Attribution: reference-free calibrated quality regression with validated per-joint, per-phase attribution"
+abstract: >-
+  A reference-free action-quality assessment pipeline built on a hand-rolled
+  spatio-temporal graph convolution, an ordinal scoring head, non-crossing
+  quantile intervals, and per-joint / per-phase attribution that is validated
+  against exact ground truth from a procedural motion generator.
+authors:
+  - family-names: Sajid
+    given-names: Habiba
+version: 1.0.0
+date-released: 2026-08-27
+license: MIT
+repository-code: "https://github.com/HabibaSajid321/skeletal-action-quality-attribution"
+keywords:
+  - action quality assessment
+  - skeleton
+  - graph convolution
+  - attribution
+  - ordinal regression
+  - quantile regression
+  - uncertainty quantification
+references:
+  - type: conference-paper
+    title: "Spatial Temporal Graph Convolutional Networks for Skeleton-Based Action Recognition"
+    authors:
+      - family-names: Yan
+        given-names: Sijie
+      - family-names: Xiong
+        given-names: Yuanjun
+      - family-names: Lin
+        given-names: Dahua
+    year: 2018
+  - type: conference-paper
+    title: "What and How Well You Performed? A Multitask Learning Approach to Action Quality Assessment"
+    authors:
+      - family-names: Parmar
+        given-names: Paritosh
+      - family-names: Morris
+        given-names: Brendan
+    year: 2019
+  - type: conference-paper
+    title: "Axiomatic Attribution for Deep Networks"
+    authors:
+      - family-names: Sundararajan
+        given-names: Mukund
+      - family-names: Taly
+        given-names: Ankur
+      - family-names: Yan
+        given-names: Qiqi
+    year: 2017
