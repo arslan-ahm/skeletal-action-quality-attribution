@@ -195,7 +195,19 @@ The reference ST-GCN block applies a dense `(kt, 1)` temporal convolution costin
 `kt = 9` this removes roughly a factor of `kt` from the temporal stage.
 
 `stgcn_dense` is the *identical* architecture with `separable=False`, so the
-ablation isolates separability from width and depth.
+ablation isolates separability from width and depth. It is also the **trained**
+stand-in for the dense-temporal-convolution design of the reference lineage:
+2.9x the parameters of ours, 2.6x the MACs, same graph, same head, same
+schedule, same data, same seed.
+
+Two genuinely reference-scale models — `stgcn_reference` (0.76M) and
+`stgcn_reference_large` (3.02M, the nine-block 64/128/256 stack of Yan et al.)
+— are **benchmarked for parameters, MACs and latency but not trained here.**
+That is the efficiency claim and it is measured; the accuracy claim is not made,
+because a single training run of either exceeds this project's 20-minute per-run
+budget on a shared four-core CPU by a wide margin, and a shortened schedule
+would produce a number about the schedule rather than about the architecture.
+`notebooks/05_colab_full_scale.ipynb` trains them on a GPU.
 
 ### 4.3 BatchNorm, and why it is not a preference
 

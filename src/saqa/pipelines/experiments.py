@@ -29,12 +29,21 @@ from .core import RunResult, Splits, evaluate_predictions, make_splits, run_sing
 
 TABLES = Path("results/tables")
 
-#: The neural arms of the headline comparison. ``stgcn_reference_large`` is not
-#: here: it is benchmarked for cost only (see the registry docstring).
+#: The neural arms of the headline comparison.
+#:
+#: ``stgcn_reference`` (0.76M) and ``stgcn_reference_large`` (3.02M) are **not**
+#: here. Both are benchmarked for parameters, MACs and latency -- that is the
+#: efficiency claim, and it is measured -- but neither is *trained*, because on
+#: this machine a single run of either exceeds the project's 20-minute per-run
+#: budget by a wide margin. Training them on a shortened schedule would produce
+#: an accuracy number that says more about the schedule than about the
+#: architecture, so none is claimed. ``stgcn_dense`` is the trained stand-in for
+#: the dense-temporal-convolution design the reference lineage uses: same shape
+#: as ours, 2.9x the parameters, ``separable=False``. It isolates the one
+#: mechanism the efficiency argument rests on.
 NEURAL_ARMS: tuple[str, ...] = (
     "saqa_stgcn",
     "stgcn_dense",
-    "stgcn_reference",
     "tcn",
     "lstm",
     "frame_average",
