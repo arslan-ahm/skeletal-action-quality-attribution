@@ -91,7 +91,16 @@ negative result rather than omitted. See [Results](#results).
 ## Efficiency, measured rather than quoted
 
 <!-- table:efficiency -->
-_not measured_
+| architecture | params_M | MMACs | latency_bs1_ms | iqr_bs1_ms | latency_bs8_ms | macs_per_ms_bs1 | params_reduction | macs_reduction | latency_reduction |
+|---|---|---|---|---|---|---|---|---|---|
+| saqa_stgcn_tiny | 0.017 | 4.942 | 8.701 | 2.027 | 19.082 | 0.568 | 179.03 | 176.49 | 8.691 |
+| saqa_stgcn | 0.067 | 16.924 | 12.23 | 2.702 | 33.158 | 1.384 | 45.278 | 51.535 | 6.183 |
+| stgcn_dense | 0.194 | 43.82 | 11.526 | 1.456 | 39.41 | 3.802 | 15.588 | 19.904 | 6.561 |
+| stgcn_reference | 0.759 | 167.542 | 20.57 | 2.19 | 112.029 | 8.145 | 3.985 | 5.206 | 3.676 |
+| stgcn_reference_large | 3.024 | 872.194 | 75.62 | 5.391 | 477.009 | 11.534 | 1 | 1 | 1 |
+| tcn | 0.123 | 5.834 | 4.888 | 0.304 | 7.78 | 1.193 | 24.645 | 149.499 | 15.469 |
+| lstm | 0.16 | 7.545 | 5.148 | 2.126 | 12.694 | 1.466 | 18.918 | 115.594 | 14.688 |
+| frame_average | 0.026 | 0.026 | 1.352 | 0.695 | 3.086 | 0.019 | 116.471 | 33900.577 | 55.915 |
 <!-- /table -->
 
 Ten warm-up iterations, thirty timed repeats, median and IQR, 2 torch threads at
@@ -104,7 +113,13 @@ cost matrix and quadratic again in the dynamic program. The graph model is
 `O(T)`. Both exponents are *fitted from measurements*, not asserted:
 
 <!-- table:cost_curve -->
-_not measured_
+| num_frames | dtw_total_ms | model_ms | speedup |
+|---|---|---|---|
+| 24 | 2.155 | 10.89 | 0.198 |
+| 48 | 7.303 | 10.72 | 0.681 |
+| 96 | 43.478 | 19.911 | 2.184 |
+| 192 | 134.822 | 20.915 | 6.446 |
+| 384 | 537.419 | 33.698 | 15.948 |
 <!-- /table -->
 
 ## Results
@@ -171,13 +186,27 @@ of the identical configuration gives a run-to-run scale of **0.1205 Spearman**:
 
 ### The efficiency claim, stated precisely
 
-The graph model is 45x smaller and 52x cheaper in MACs than the reference-scale
-ST-GCN it is modelled on. Against the *DTW baseline*, the honest statement is
-asymptotic and has a crossover: DTW is `O(T²)` and measurably so (fitted
-exponent 1.98), the model is `O(T)` in MACs (asserted by test), **but at the 48
-frames these experiments use, DTW is the cheaper of the two in wall-clock.** The
-scaling advantage only pays off on longer sequences. Anyone quoting a speed-up
-here without the sequence length attached is quoting the wrong number.
+Three separate claims, and only two of them hold.
+
+**Against the reference-scale ST-GCN: real, and measured.** 45.3x fewer
+parameters (0.067M vs 3.024M), 51.5x fewer MACs, **6.18x lower latency**
+(12.23 ms vs 75.62 ms, batch 1, 48 frames). Note the gap between 51.5x MACs and
+6.18x time: the small model retires 1.38 MMAC/ms against the large one's 11.53,
+because narrow convolutions are memory-bandwidth bound. MACs are a poor proxy for
+latency and this table shows by how much.
+
+**Against DTW: asymptotic, with a crossover on the wrong side of these
+experiments.** DTW's fitted cost exponent is **2.013**; the model's MAC count is
+linear. But the measured crossover sits between 48 and 96 frames — **at the 48
+frames used throughout this study, DTW is 1.5x *faster*.** It only pays off
+above ~96 frames (2.2x), reaching 15.9x at 384.
+
+**The separable temporal convolution saves no time at all.** Against
+`stgcn_dense`, the identical architecture with dense temporal convolutions:
+2.9x fewer parameters, 2.59x fewer MACs, and **6% slower** (12.23 ms vs
+11.53 ms). The depthwise convolution that produces the saving is memory-bound.
+The parameter reduction is real; the latency reduction is not, and quoting the
+MAC ratio alone would have been misleading.
 
 Full tables, statistical tests, the seed study, ablations and the retractions:
 **[docs/RESULTS.md](docs/RESULTS.md)**

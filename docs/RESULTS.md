@@ -68,7 +68,16 @@ All three are reported, along with the achieved MACs-per-millisecond, because a
 FLOP reduction does not convert to time one-for-one.
 
 <!-- table:efficiency -->
-_not measured_
+| architecture | params_M | MMACs | latency_bs1_ms | iqr_bs1_ms | latency_bs8_ms | macs_per_ms_bs1 | params_reduction | macs_reduction | latency_reduction |
+|---|---|---|---|---|---|---|---|---|---|
+| saqa_stgcn_tiny | 0.017 | 4.942 | 8.701 | 2.027 | 19.082 | 0.568 | 179.03 | 176.49 | 8.691 |
+| saqa_stgcn | 0.067 | 16.924 | 12.23 | 2.702 | 33.158 | 1.384 | 45.278 | 51.535 | 6.183 |
+| stgcn_dense | 0.194 | 43.82 | 11.526 | 1.456 | 39.41 | 3.802 | 15.588 | 19.904 | 6.561 |
+| stgcn_reference | 0.759 | 167.542 | 20.57 | 2.19 | 112.029 | 8.145 | 3.985 | 5.206 | 3.676 |
+| stgcn_reference_large | 3.024 | 872.194 | 75.62 | 5.391 | 477.009 | 11.534 | 1 | 1 | 1 |
+| tcn | 0.123 | 5.834 | 4.888 | 0.304 | 7.78 | 1.193 | 24.645 | 149.499 | 15.469 |
+| lstm | 0.16 | 7.545 | 5.148 | 2.126 | 12.694 | 1.466 | 18.918 | 115.594 | 14.688 |
+| frame_average | 0.026 | 0.026 | 1.352 | 0.695 | 3.086 | 0.019 | 116.471 | 33900.577 | 55.915 |
 <!-- /table -->
 
 Measured with 10 warm-up iterations and 30 timed repeats, median and IQR, on 2
@@ -86,12 +95,54 @@ across sequence lengths and the exponent is fitted on the log-log slope rather
 than asserted:
 
 <!-- table:cost_curve -->
-_not measured_
+| num_frames | dtw_total_ms | model_ms | speedup |
+|---|---|---|---|
+| 24 | 2.155 | 10.89 | 0.198 |
+| 48 | 7.303 | 10.72 | 0.681 |
+| 96 | 43.478 | 19.911 | 2.184 |
+| 192 | 134.822 | 20.915 | 6.446 |
+| 384 | 537.419 | 33.698 | 15.948 |
 <!-- /table -->
 
-This is the efficiency claim that matters against the reference repository, and
-it is a claim about *asymptotics that are visible at realistic lengths*, not a
-constant factor.
+Fitted log-log exponents: **DTW 2.013**, essentially exactly quadratic as the
+algorithm requires; the model's fitted exponent is **0.422**, which is *below*
+linear because at these lengths it is dominated by fixed per-call overhead rather
+than by arithmetic (its MAC count is linear in ``T``, asserted by
+`test_macs_scale_linearly_with_sequence_length`).
+
+**The crossover is between 48 and 96 frames, and it is on the wrong side of the
+configuration these experiments use.** At 24 frames DTW is 5.1x faster than the
+model; at 48 frames -- the length of every accuracy experiment here -- DTW is
+still **1.5x faster**. Only at 96 frames does the model pull ahead (2.2x), rising
+to 15.9x at 384.
+
+So the asymptotic claim is real and measured, and **the constant-factor claim at
+this project's own operating point runs the other way.** Anyone quoting a
+speed-up over DTW without attaching a sequence length is quoting the wrong
+number.
+
+### 1.2 Two things the MAC column gets wrong
+
+**A 51.5x MAC reduction buys 6.2x latency.** The graph model retires 1.384
+MMAC/ms; the reference-scale ST-GCN retires 11.534 MMAC/ms -- 8.3x more. Wide
+dense convolutions vectorise; narrow ones are memory-bandwidth bound. This is why
+the table reports achieved throughput and all three ratios rather than implying
+they are the same number.
+
+**The separable temporal stage saves parameters and MACs but no time at all.**
+Against `stgcn_dense`, which is the identical architecture with dense temporal
+convolutions:
+
+| | params | MACs | latency bs=1 | MMAC/ms |
+|---|---|---|---|---|
+| `saqa_stgcn` (separable) | 0.067 M | 16.9 | **12.23 ms** | 1.384 |
+| `stgcn_dense` | 0.194 M | 43.8 | **11.53 ms** | 3.802 |
+
+2.9x fewer parameters and 2.59x fewer MACs, and it is **6% slower**. The
+depthwise convolution that produces the saving is entirely memory-bound. The
+parameter reduction is real and matters for model size and for the data-efficiency
+argument; the latency reduction does not exist. Reporting the MAC ratio alone
+here would have been straightforwardly misleading.
 
 ## 2. Quality regression
 
