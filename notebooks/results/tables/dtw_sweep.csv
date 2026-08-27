@@ -1,0 +1,2 @@
+config,val_spearman,test_spearman,test_kendall_tau,test_pearson,test_relative_l2,test_mae,test_rmse,test_tie_fraction_truth,test_n
+dtw_per_joint_norm_band0.15_exemplar,0.5561703372716782,0.3803718913949538,0.23799637209036054,0.35709862997033903,0.2857553511907442,0.18257221321943964,0.22256389101042232,0.21052631578947367,76.0

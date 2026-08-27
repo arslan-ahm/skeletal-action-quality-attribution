@@ -12,3 +12,12 @@ F:\projects\new ai projects\skeletal-action-quality-attribution\.venv\Lib\site-p
 F:\projects\new ai projects\skeletal-action-quality-attribution\.venv\Lib\site-packages\zmq\_future.py:718: RuntimeWarning: Proactor event loop does not implement add_reader family of methods required for zmq. Registering an additional selector thread for add_reader support via tornado. Use `asyncio.set_event_loop_policy(WindowsSelectorEventLoopPolicy())` to avoid this warning.
   self._get_loop()
 [IPKernelApp] WARNING | Kernel is running over TCP without encryption. All communication (including code and outputs) is sent in plain text and is susceptible to eavesdropping. Use IPC transport or launch with kernel manager-provisioned CurveZMQ keys to enable transport encryption.
+  executed F:\projects\new ai projects\skeletal-action-quality-attribution\notebooks\03_ablations_and_noise.ipynb
+  executing F:\projects\new ai projects\skeletal-action-quality-attribution\notebooks\04_attribution_and_uncertainty.ipynb ...
+[IPKernelApp] WARNING | Kernel is running over TCP without encryption. All communication (including code and outputs) is sent in plain text and is susceptible to eavesdropping. Use IPC transport or launch with kernel manager-provisioned CurveZMQ keys to enable transport encryption.
+  executed F:\projects\new ai projects\skeletal-action-quality-attribution\notebooks\04_attribution_and_uncertainty.ipynb
+  executing F:\projects\new ai projects\skeletal-action-quality-attribution\notebooks\02_train_and_compare.ipynb ...
+[IPKernelApp] WARNING | Kernel is running over TCP without encryption. All communication (including code and outputs) is sent in plain text and is susceptible to eavesdropping. Use IPC transport or launch with kernel manager-provisioned CurveZMQ keys to enable transport encryption.
+  executed F:\projects\new ai projects\skeletal-action-quality-attribution\notebooks\02_train_and_compare.ipynb
+  skipping 05_colab_full_scale.ipynb (needs a GPU; cells are commented out)
+EXIT=0
