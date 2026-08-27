@@ -9,8 +9,8 @@ endif
 # The exact overrides behind the committed tables. The base config is already
 # sized for this machine; only the epoch count differs between the headline runs
 # and the ablations, and that difference is stated in docs/RESULTS.md.
-MAIN := optim.epochs=16
-ABLATE := optim.epochs=12
+MAIN := data.num_sequences=1000 optim.epochs=10
+ABLATE := data.num_sequences=1000 optim.epochs=8
 
 .PHONY: help setup test test-all lint fmt smoke bench compare ablate splits \
         dataeff all figures notebooks clean clean-results
