@@ -80,9 +80,17 @@ def frame_cost_matrix(
     if distance == "velocity_cosine":
         qv = np.diff(q, axis=0, prepend=q[:1])
         rv = np.diff(r, axis=0, prepend=r[:1])
-        qn = qv / np.maximum(np.linalg.norm(qv, axis=-1, keepdims=True), 1e-8)
-        rn = rv / np.maximum(np.linalg.norm(rv, axis=-1, keepdims=True), 1e-8)
+        qnorm = np.linalg.norm(qv, axis=-1, keepdims=True)
+        rnorm = np.linalg.norm(rv, axis=-1, keepdims=True)
+        qn = qv / np.maximum(qnorm, 1e-8)
+        rn = rv / np.maximum(rnorm, 1e-8)
         cos = np.einsum("tvc,svc->tsv", qn, rn)
+        # Two *stationary* joints are maximally similar, not maximally different.
+        # Without this the ``prepend`` that defines the first frame's velocity as
+        # zero gives every self-comparison a cost of 1/T -- so a sequence was not
+        # identical to itself, which broke the distance's only closed-form check.
+        still = (qnorm[:, None, :, 0] < 1e-8) & (rnorm[None, :, :, 0] < 1e-8)
+        cos = np.where(still, 1.0, cos)
         return (1.0 - cos).mean(axis=-1)
     raise ValueError(f"Unknown distance {distance!r}; known: {DISTANCES}")
 
@@ -114,7 +122,13 @@ def dtw_distance(
     width = int(np.ceil(band * max(n, m))) if band is not None else max(n, m)
 
     for i in range(1, n + 1):
-        centre = (i - 1) * m / n
+        # Anchor the band on the cell the diagonal actually passes through:
+        # i = 1 maps to j = 1 and i = n maps to j = m. The obvious
+        # ``(i - 1) * m / n`` is off by one, which shifts the band away from the
+        # diagonal and makes the distance asymmetric -- ``d(a, b) != d(b, a)``
+        # even for equal-length sequences. Caught by
+        # tests/test_baselines_and_engine.py::test_dtw_is_symmetric.
+        centre = (i - 1) * (m - 1) / max(n - 1, 1) + 1
         lo = max(1, int(np.floor(centre - width)) + 1)
         hi = min(m, int(np.ceil(centre + width)) + 1)
         for j in range(lo, hi + 1):
