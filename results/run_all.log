@@ -2,3 +2,100 @@
 ======================================================================
 === stage: compare
 ======================================================================
+dataset: {'train': 638, 'val': 112, 'test': 250}  split=subject
+[compare] training saqa_stgcn
+[compare] training stgcn_dense
+[compare] training tcn
+[compare] training lstm
+[compare] training frame_average
+
+=== method comparison ===
+             method   family  spearman  kendall_tau  relative_l2      mae  coverage  mean_width     aurc  error_auroc   params
+         saqa_stgcn   neural  0.384221     0.264127     0.249802 0.152609     0.896    0.602108 0.142227     0.534737  66791.0
+        stgcn_dense   neural  0.350705     0.238045     0.251786 0.154085     0.860    0.630863 0.148780     0.508590 194007.0
+                tcn   neural  0.330512     0.228054     0.252120 0.155668     0.864    0.576795 0.143814     0.549051 122707.0
+               lstm   neural  0.356906     0.242327     0.249836 0.156083     0.800    0.603706 0.155645     0.498527 159859.0
+      frame_average   neural  0.238133     0.163303     0.262562 0.160010     0.932    0.599853 0.160211     0.497132  25965.0
+    untrained_stgcn  control -0.054728    -0.035820     0.631877 0.435314     1.000    1.409395 0.439650     0.555208  66791.0
+      kinematic_gbr baseline  0.596846     0.427106     0.214010 0.128948     0.880    0.569337 0.125166     0.539837      NaN
+      dtw_reference baseline  0.499592     0.346681     0.240742 0.145227     0.864    0.539605 0.148500     0.474351      NaN
+framewise_reference baseline  0.419076     0.294997     0.252423 0.151162     0.868    0.570263 0.151076     0.519333      NaN
+
+=== paired tests vs the reference DTW approach ===
+   family                        name_a    mean_a   mean_b  difference  ci_lower  ci_upper   p_adjusted  significant
+abs_error          saqa_stgcn.abs_error  0.152609 0.145227    0.007382 -0.005242  0.020202 3.908252e-01        False
+abs_error         stgcn_dense.abs_error  0.154085 0.145227    0.008858 -0.003743  0.021473 3.862959e-01        False
+abs_error                 tcn.abs_error  0.155668 0.145227    0.010440 -0.000933  0.022022 2.778622e-01        False
+abs_error                lstm.abs_error  0.156083 0.145227    0.010855  0.000188  0.022256 3.261798e-01        False
+abs_error       frame_average.abs_error  0.160010 0.145227    0.014782  0.000735  0.029231 3.121421e-01        False
+abs_error       kinematic_gbr.abs_error  0.128948 0.145227   -0.016280 -0.030023 -0.003056 1.048444e-01        False
+abs_error framewise_reference.abs_error  0.151162 0.145227    0.005934 -0.002660  0.014814 3.908252e-01        False
+abs_error     untrained_stgcn.abs_error  0.435314 0.145227    0.290087  0.263488  0.317200 5.067993e-34         True
+ spearman           saqa_stgcn.spearman  0.384221 0.499592   -0.115371 -0.230145 -0.009240          NaN         True
+ spearman          stgcn_dense.spearman  0.350705 0.499592   -0.148887 -0.268919 -0.037289          NaN         True
+ spearman                  tcn.spearman  0.330512 0.499592   -0.169080 -0.278125 -0.062708          NaN         True
+ spearman                 lstm.spearman  0.356906 0.499592   -0.142686 -0.247436 -0.039992          NaN         True
+ spearman        frame_average.spearman  0.238133 0.499592   -0.261459 -0.384727 -0.136675          NaN         True
+ spearman        kinematic_gbr.spearman  0.596846 0.499592    0.097254 -0.004073  0.207987          NaN        False
+ spearman  framewise_reference.spearman  0.419076 0.499592   -0.080516 -0.163816 -0.004878          NaN         True
+ spearman      untrained_stgcn.spearman -0.054728 0.499592   -0.554320 -0.708020 -0.394918          NaN         True
+
+=== monotonicity ===
+       method  violation_rate  ladders_with_any_violation  max_increase  rank_inconsistency
+   saqa_stgcn        0.161667                    0.350000      0.009169                 0.0
+  stgcn_dense        0.290000                    0.383333      0.020690                 0.0
+          tcn        0.115000                    0.166667      0.009312                 0.0
+         lstm        0.278333                    0.450000      0.007953                 0.0
+frame_average        0.283333                    0.400000      0.006013                 0.0
+
+=== Spearman per action class ===
+             method      gait  gait__n     lunge  lunge__n  overhead_press  overhead_press__n     squat  squat__n    throw  throw__n
+         saqa_stgcn  0.556683     54.0  0.355482      58.0        0.362995               48.0  0.501294      39.0 0.259485      51.0
+        stgcn_dense  0.498189     54.0  0.248113      58.0        0.310929               48.0  0.454855      39.0 0.281677      51.0
+                tcn  0.036263     54.0  0.452187      58.0        0.350562               48.0  0.564158      39.0 0.301232      51.0
+               lstm  0.117178     54.0  0.407378      58.0        0.363863               48.0  0.553917      39.0 0.340250      51.0
+      frame_average  0.257426     54.0  0.188943      58.0        0.421684               48.0  0.386414      39.0 0.451302      51.0
+      kinematic_gbr  0.533804     54.0  0.617247      58.0        0.620935               48.0  0.767251      39.0 0.530066      51.0
+      dtw_reference  0.422218     54.0  0.512278      58.0        0.577337               48.0  0.473470      39.0 0.498471      51.0
+framewise_reference  0.320062     54.0  0.409193      58.0        0.514953               48.0  0.593977      39.0 0.361881      51.0
+    untrained_stgcn -0.183877     54.0 -0.229071      58.0       -0.434931               48.0 -0.055868      39.0 0.070627      51.0
+
+attribution fidelity on 150 of 250 test sequences
+
+=== attribution fidelity (joint) ===
+        model                    attribution  joint_precision  joint_recall  joint_iou  joint_rank_corr  joint_top1_hit  frame_localisation_error
+   saqa_stgcn           integrated_gradients         0.509470      0.509470   0.403767        -0.240486        0.000000                  0.047563
+   saqa_stgcn                      occlusion         0.528197      0.528197   0.425618        -0.173822        0.000000                  0.116337
+   saqa_stgcn                       gradient         0.527522      0.527522   0.418132        -0.106005        0.058333                  0.050516
+   saqa_stgcn                         random         0.555096      0.555096   0.444169         0.000985        0.033333                  0.040537
+   saqa_stgcn integrated_gradients_untrained         0.690243      0.690243   0.563884         0.269873        0.475000                  0.056089
+   saqa_stgcn         edge_importance_global         0.526702      0.526702   0.409803        -0.224910        0.000000                       NaN
+  stgcn_dense           integrated_gradients         0.543070      0.543070   0.423299        -0.176423        0.000000                  0.110829
+  stgcn_dense                      occlusion         0.549293      0.549293   0.441269        -0.145233        0.000000                  0.145781
+  stgcn_dense                       gradient         0.536197      0.536197   0.427454        -0.047936        0.033333                  0.083963
+  stgcn_dense                         random         0.555096      0.555096   0.444169         0.000985        0.033333                  0.040537
+  stgcn_dense integrated_gradients_untrained         0.693831      0.693831   0.575713         0.145605        0.116667                  0.076314
+  stgcn_dense         edge_importance_global         0.534104      0.534104   0.420740        -0.248994        0.000000                       NaN
+          tcn           integrated_gradients         0.590466      0.590466   0.461499         0.000030        0.141667                  0.055473
+          tcn                      occlusion         0.561934      0.561934   0.454431        -0.073044        0.000000                  0.123797
+          tcn                       gradient         0.530499      0.530499   0.419367        -0.076054        0.108333                  0.050010
+          tcn                         random         0.555096      0.555096   0.444169         0.000985        0.033333                  0.040537
+          tcn integrated_gradients_untrained         0.698252      0.698252   0.565162         0.290149        0.250000                  0.053669
+         lstm           integrated_gradients         0.586394      0.586394   0.460715        -0.027640        0.175000                  0.069009
+         lstm                      occlusion         0.524427      0.524427   0.417621        -0.149837        0.000000                  0.155414
+         lstm                       gradient         0.517918      0.517918   0.404215        -0.156287        0.141667                  0.055281
+         lstm                         random         0.555096      0.555096   0.444169         0.000985        0.033333                  0.040537
+         lstm integrated_gradients_untrained         0.694072      0.694072   0.559861         0.244058        0.200000                  0.054035
+frame_average           integrated_gradients         0.543826      0.543826   0.431003         0.013456        0.191667                  0.085811
+frame_average                      occlusion         0.510131      0.510131   0.405452        -0.189214        0.000000                  0.123464
+frame_average                       gradient         0.577298      0.577298   0.461063        -0.043288        0.133333                  0.102106
+frame_average                         random         0.555096      0.555096   0.444169         0.000985        0.033333                  0.040537
+frame_average integrated_gradients_untrained         0.601058      0.601058   0.458780        -0.064764        0.166667                  0.039100
+dtw_reference        per_joint_dtw_deviation         0.554276      0.554276   0.455227        -0.119419        0.333333                       NaN
+
+IG completeness residual: mean 8.67e-04, max 4.88e-03 at 24 steps
+=== stage compare finished in 32.7 min (exit 0)
+
+======================================================================
+=== stage: seeds
+======================================================================

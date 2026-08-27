@@ -60,6 +60,7 @@ negative result rather than omitted. See [Results](#results).
 ## Efficiency, measured rather than quoted
 
 <!-- table:efficiency -->
+_not measured_
 <!-- /table -->
 
 Ten warm-up iterations, thirty timed repeats, median and IQR, 2 torch threads at
@@ -72,6 +73,7 @@ cost matrix and quadratic again in the dynamic program. The graph model is
 `O(T)`. Both exponents are *fitted from measurements*, not asserted:
 
 <!-- table:cost_curve -->
+_not measured_
 <!-- /table -->
 
 ## Results

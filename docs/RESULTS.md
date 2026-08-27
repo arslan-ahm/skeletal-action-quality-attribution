@@ -77,7 +77,17 @@ seed. `model.architecture` is the only thing that differs between the neural
 arms.
 
 <!-- table:method -->
-_not measured_
+| method | family | spearman | kendall_tau | relative_l2 | mae | coverage | mean_width | error_auroc | params |
+|---|---|---|---|---|---|---|---|---|---|
+| kinematic_gbr | baseline | **0.5968** | 0.4271 | **0.214** | 0.1289 | 0.88 | 0.5693 | 0.5398 | n/a |
+| dtw_reference | baseline | 0.4996 | 0.3467 | 0.2407 | 0.1452 | 0.864 | 0.5396 | 0.4744 | n/a |
+| framewise_reference | baseline | 0.4191 | 0.295 | 0.2524 | 0.1512 | 0.868 | 0.5703 | 0.5193 | n/a |
+| saqa_stgcn | neural | 0.3842 | 0.2641 | 0.2498 | 0.1526 | 0.896 | 0.6021 | 0.5347 | 66791 |
+| lstm | neural | 0.3569 | 0.2423 | 0.2498 | 0.1561 | 0.8 | 0.6037 | 0.4985 | 1.60e+05 |
+| stgcn_dense | neural | 0.3507 | 0.238 | 0.2518 | 0.1541 | 0.86 | 0.6309 | 0.5086 | 1.94e+05 |
+| tcn | neural | 0.3305 | 0.2281 | 0.2521 | 0.1557 | 0.864 | 0.5768 | 0.5491 | 1.23e+05 |
+| frame_average | neural | 0.2381 | 0.1633 | 0.2626 | 0.16 | 0.932 | 0.5999 | 0.4971 | 25965 |
+| untrained_stgcn | control | -0.0547 | -0.0358 | 0.6319 | 0.4353 | 1 | 1.4094 | 0.5552 | 66791 |
 <!-- /table -->
 
 ### 2.1 The reference approach, given a fair fight
@@ -87,7 +97,20 @@ canonical/exemplar reference — each with per-action isotonic calibration onto 
 quality scale, **selected on validation**:
 
 <!-- table:dtw_sweep -->
-_not measured_
+| config | val_spearman | test_spearman | test_relative_l2 | test_mae |
+|---|---|---|---|---|
+| dtw_l2_band0.15_canonical | **0.5972** | 0.4996 | 0.2407 | 0.1452 |
+| dtw_l2_unbanded_canonical | 0.5972 | 0.4996 | 0.2407 | 0.1452 |
+| dtw_l2_band0.15_exemplar | 0.5499 | 0.3988 | 0.2536 | 0.1549 |
+| dtw_l2_unbanded_exemplar | 0.5499 | 0.3988 | 0.2536 | 0.1549 |
+| dtw_per_joint_norm_band0.15_exemplar | 0.4765 | 0.3979 | 0.256 | 0.1562 |
+| dtw_per_joint_norm_unbanded_exemplar | 0.4765 | 0.3979 | 0.256 | 0.1562 |
+| dtw_per_joint_norm_band0.15_canonical | 0.4371 | 0.3964 | 0.2517 | 0.153 |
+| dtw_per_joint_norm_unbanded_canonical | 0.4371 | 0.3964 | 0.2517 | 0.153 |
+| dtw_velocity_cosine_band0.15_canonical | 0.4021 | 0.3244 | 0.2553 | 0.1538 |
+| dtw_velocity_cosine_unbanded_canonical | 0.4021 | 0.3244 | 0.2553 | 0.1538 |
+| dtw_velocity_cosine_band0.15_exemplar | 0.3492 | 0.3191 | 0.2622 | 0.1583 |
+| dtw_velocity_cosine_unbanded_exemplar | 0.3492 | 0.3191 | 0.2622 | 0.1583 |
 <!-- /table -->
 
 The single largest fairness fix was per-action calibration. Distances are not
@@ -99,7 +122,16 @@ and it is the number a careless implementation produces.
 ### 2.2 Is the difference significant?
 
 <!-- table:statistics -->
-_not measured_
+| name_a | mean_a | mean_b | difference | ci_lower | ci_upper | p_value | p_adjusted | effect_size | significant |
+|---|---|---|---|---|---|---|---|---|---|
+| saqa_stgcn.spearman | 0.3842 | 0.4996 | -0.1154 | -0.2301 | -0.0092 | n/a | n/a | n/a | yes |
+| stgcn_dense.spearman | 0.3507 | 0.4996 | -0.1489 | -0.2689 | -0.0373 | n/a | n/a | n/a | yes |
+| tcn.spearman | 0.3305 | 0.4996 | -0.1691 | -0.2781 | -0.0627 | n/a | n/a | n/a | yes |
+| lstm.spearman | 0.3569 | 0.4996 | -0.1427 | -0.2474 | -0.04 | n/a | n/a | n/a | yes |
+| frame_average.spearman | 0.2381 | 0.4996 | -0.2615 | -0.3847 | -0.1367 | n/a | n/a | n/a | yes |
+| kinematic_gbr.spearman | 0.5968 | 0.4996 | 0.0973 | -0.0041 | 0.208 | n/a | n/a | n/a | no |
+| framewise_reference.spearman | 0.4191 | 0.4996 | -0.0805 | -0.1638 | -0.0049 | n/a | n/a | n/a | yes |
+| untrained_stgcn.spearman | -0.0547 | 0.4996 | -0.5543 | -0.708 | -0.3949 | n/a | n/a | n/a | yes |
 <!-- /table -->
 
 ### 2.2.1 And is it bigger than the noise?
@@ -110,6 +142,7 @@ than re-rolling the seed". Deltas are against the reference DTW baseline, divide
 by the `sqrt(2) * sd` from the three-seed study in §5.
 
 <!-- table:verdicts -->
+_not measured_
 <!-- /table -->
 
 **What a paired test here does and does not say.** It conditions on **one
@@ -127,7 +160,17 @@ recomputing the metric for both methods on each resample.
 ### 2.3 Per action class
 
 <!-- table:per_action -->
-_not measured_
+| method | gait | lunge | overhead_press | squat | throw |
+|---|---|---|---|---|---|
+| saqa_stgcn | 0.5567 | 0.3555 | 0.363 | 0.5013 | 0.2595 |
+| stgcn_dense | 0.4982 | 0.2481 | 0.3109 | 0.4549 | 0.2817 |
+| tcn | 0.0363 | 0.4522 | 0.3506 | 0.5642 | 0.3012 |
+| lstm | 0.1172 | 0.4074 | 0.3639 | 0.5539 | 0.3402 |
+| frame_average | 0.2574 | 0.1889 | 0.4217 | 0.3864 | 0.4513 |
+| kinematic_gbr | 0.5338 | 0.6172 | 0.6209 | 0.7673 | 0.5301 |
+| dtw_reference | 0.4222 | 0.5123 | 0.5773 | 0.4735 | 0.4985 |
+| framewise_reference | 0.3201 | 0.4092 | 0.515 | 0.594 | 0.3619 |
+| untrained_stgcn | -0.1839 | -0.2291 | -0.4349 | -0.0559 | 0.0706 |
 <!-- /table -->
 
 ## 3. Attribution fidelity
@@ -138,13 +181,61 @@ a uniform-random attribution, and **the same method applied to an untrained
 model** — the parameter-randomisation sanity check of Adebayo et al. (2018).
 
 <!-- table:attribution -->
-_not measured_
+| attribution | joint_precision | joint_recall | joint_iou | joint_rank_corr | joint_top1_hit | joint_overlap | frame_localisation_error |
+|---|---|---|---|---|---|---|---|
+| integrated_gradients | 0.5095 | 0.5095 | 0.4038 | -0.2405 | 0 | 0.4752 | 0.0476 |
+| occlusion | 0.5282 | 0.5282 | 0.4256 | -0.1738 | 0 | 0.3143 | 0.1163 |
+| gradient | 0.5275 | 0.5275 | 0.4181 | -0.106 | 0.0583 | 0.5028 | 0.0505 |
+| random | 0.5551 | 0.5551 | 0.4442 | 9.85e-04 | 0.0333 | 0.5455 | 0.0405 |
+| integrated_gradients_untrained | 0.6902 | 0.6902 | 0.5639 | 0.2699 | 0.475 | 0.6781 | 0.0561 |
+| edge_importance_global | 0.5267 | 0.5267 | 0.4098 | -0.2249 | 0 | 0.5973 | n/a |
 <!-- /table -->
 
 `n_joint_iou` is the number of test sequences that contributed: clean sequences
 have no cause to attribute and are excluded rather than scored as perfect.
 
-<!-- ATTRIBUTION_READING -->
+### 3.1 The attributions fail their own sanity check
+
+This is the project's central experiment and it returns a **negative result**,
+consistently, across every architecture and every attribution method:
+
+* the trained models' attributions have rank correlation with the ground-truth
+  joint importance between **-0.24 and 0.01** — that is, at or *below* chance,
+  and often systematically anti-correlated;
+* a **uniform-random** attribution scores 0.0010;
+* the **same method applied to an untrained network** scores **+0.15 to +0.29**,
+  and hits the single most-responsible joint 47.5% of the time against 0.0-19.2%
+  for the trained models and 3.3% for random.
+
+An untrained network explains this task's ground truth better than a trained one.
+That is precisely the failure mode Adebayo et al. (2018) described: a saliency
+map that reflects input geometry rather than anything the model learned. The
+control was cheap to include and it is the only reason this is visible; without
+it, the trained model's top-k precision of ~0.51 would have looked like a result,
+because it *is* the same order as the random baseline's 0.56 and nobody would
+have computed the random baseline.
+
+Two secondary observations:
+
+**The DTW baseline's explanation fails differently.** Its per-joint deviation
+along the optimal path also anti-correlates overall (-0.12), but it has the best
+`top1_hit` of any method (0.333): it finds the single most-affected joint a third
+of the time while ranking the rest wrongly. That is consistent with its
+mechanism — the alignment minimises whole-body cost, so it sees the largest
+deviation clearly and everything below it poorly.
+
+**The model's own attention fails too.** `edge_importance_global`, the learned
+adjacency mask, scores -0.22. It is also a *global* quantity and cannot explain a
+single sequence, so it is reported separately and never scored as if it could.
+
+**What this does not say.** It does not say integrated gradients is a bad method,
+and it does not say the ground truth is wrong — the ground truth is exact by
+construction and is concentrated rather than uniform (top-3 joint mass 0.49
+against 0.18 for a uniform vector, §1 of `notebooks/01`). It says that *these*
+models, trained to this accuracy on this budget, have not learned features whose
+gradients point at the true cause. The honest reading is that the attribution
+machinery and its validation harness work, and the thing being validated failed.
+
 
 ## 4. Monotonicity and calibrated uncertainty
 
@@ -155,7 +246,13 @@ defect's internal randomness, and vary only the severity — with the sensor mod
 switched off, so a violation cannot be caused by a noise realisation.
 
 <!-- table:monotonicity -->
-_not measured_
+| method | violation_rate | ladders_with_any_violation | max_increase | rank_inconsistency |
+|---|---|---|---|---|
+| saqa_stgcn | 0.1617 | 0.35 | 0.0092 | 0 |
+| stgcn_dense | 0.29 | 0.3833 | 0.0207 | 0 |
+| tcn | **0.115** | 0.1667 | 0.0093 | 0 |
+| lstm | 0.2783 | 0.45 | 0.008 | 0 |
+| frame_average | 0.2833 | 0.4 | 0.006 | 0 |
 <!-- /table -->
 
 `rank_inconsistency` is a **structural** property of the shared-latent ordinal
@@ -168,7 +265,17 @@ it is measured.
 ### 4.2 Intervals
 
 <!-- table:uncertainty -->
-_not measured_
+| method | coverage | mean_width | crossing_rate | width_ratio_wrong_right | aurc | aurc_oracle | e_aurc | error_auroc |
+|---|---|---|---|---|---|---|---|---|
+| saqa_stgcn | 0.896 | 0.6021 | 0 | 1.0143 | 0.1422 | 0.068 | 0.0742 | 0.5347 |
+| stgcn_dense | 0.86 | 0.6309 | 0 | 0.9995 | 0.1488 | 0.0704 | 0.0784 | 0.5086 |
+| tcn | 0.864 | 0.5768 | 0 | 1.0146 | 0.1438 | 0.0726 | 0.0712 | 0.5491 |
+| lstm | 0.8 | 0.6037 | 0 | 1.009 | 0.1556 | 0.0742 | 0.0814 | 0.4985 |
+| frame_average | 0.932 | 0.5999 | 0 | 0.9977 | 0.1602 | 0.0717 | 0.0885 | 0.4971 |
+| untrained_stgcn | 1 | 1.4094 | 0 | 1.0001 | 0.4396 | 0.2629 | 0.1768 | 0.5552 |
+| kinematic_gbr | 0.88 | 0.5693 | 0 | 1.0107 | 0.1252 | 0.0571 | 0.0681 | 0.5398 |
+| dtw_reference | 0.864 | 0.5396 | 0 | 1 | 0.1485 | 0.0633 | 0.0852 | 0.4744 |
+| framewise_reference | 0.868 | 0.5703 | 0 | 1 | 0.1511 | 0.0641 | 0.087 | 0.5193 |
 <!-- /table -->
 
 Coverage alone cannot distinguish a useful interval from a constant-width one, so
