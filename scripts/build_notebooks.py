@@ -59,14 +59,14 @@ def notebook_01():
                       "label_stats, ACTION_CLASSES, KIND_WEIGHTS\n"
                       "from saqa.data.generator import generate_sample\n"
                       "cfg = GeneratorConfig(num_frames=48)\n"
-                      "data = build_dataset(400, cfg)\n"
+                      "data = build_dataset(300, cfg)\n"
                       "print(ACTION_CLASSES)\nprint(KIND_WEIGHTS)\n"
                       "pd.Series(label_stats(data)).round(4)"),
         new_markdown_cell("## Five kinematically distinct actions"),
         new_code_cell(
             "from saqa.viz import plot_skeleton_frames\n"
             "for action in ACTION_CLASSES:\n"
-            "    s = next(x for x in (generate_sample(i, cfg) for i in range(400))\n"
+            "    s = next(x for x in (generate_sample(i, cfg) for i in range(300))\n"
             "             if x.action == action and not x.degradations)\n"
             "    plot_skeleton_frames(s, frames=(0, 12, 24, 36), "
             "name=f'nb_skeleton_{action}.png')\n"
@@ -128,7 +128,7 @@ def notebook_02():
         new_code_cell(HEADER + "from saqa.config import load_config\n"
                       "from saqa.pipelines import make_splits, run_single, fit_baselines\n"
                       "cfg = load_config('../configs/base.yaml', "
-                      "['data.num_sequences=600', 'optim.epochs=10', "
+                      "['data.num_sequences=300', 'optim.epochs=4', "
                       "'run.out_dir=../results/runs_nb'])\n"
                       "splits = make_splits(cfg); splits.sizes()"),
         new_markdown_cell(
@@ -227,11 +227,11 @@ def notebook_03():
             "from saqa.metrics import spearman\n"
             "from saqa.engine import predict\n"
             "cfg = load_config('../configs/base.yaml', "
-            "['data.num_sequences=500', 'optim.epochs=10', 'run.out_dir=../results/runs_nb'])\n"
+            "['data.num_sequences=300', 'optim.epochs=4', 'run.out_dir=../results/runs_nb'])\n"
             "sp = make_splits(cfg)\n"
             "for norm in ('batch', 'group'):\n"
             "    c = load_config('../configs/base.yaml', "
-            "['data.num_sequences=500', 'optim.epochs=10', f'model.norm={norm}', "
+            "['data.num_sequences=300', 'optim.epochs=4', f'model.norm={norm}', "
             "'run.out_dir=../results/runs_nb'])\n"
             "    r = run_single(c, name=f'nb_norm_{norm}', splits=sp, save=False, verbose=False)\n"
             "    tr = spearman(sp.train.quality, predict(r.model, sp.train.coords)['score'])\n"
@@ -289,7 +289,7 @@ def notebook_04():
             "from saqa.pipelines import make_splits, run_single, compute_attribution\n"
             "from saqa.viz import plot_attribution_map\n"
             "cfg = load_config('../configs/base.yaml', "
-            "['data.num_sequences=500', 'optim.epochs=10', 'run.out_dir=../results/runs_nb'])\n"
+            "['data.num_sequences=300', 'optim.epochs=4', 'run.out_dir=../results/runs_nb'])\n"
             "sp = make_splits(cfg)\n"
             "res = run_single(cfg, name='nb_attr', splits=sp, save=False, verbose=False)\n"
             "k = int(np.argmax(sp.test.joint_truth.sum(1) > 0))\n"

@@ -202,7 +202,7 @@ def test_figures_return_none_without_data(tables, tmp_path, monkeypatch):
 
 def test_all_figures_is_empty_without_data(tables, tmp_path, monkeypatch):
     monkeypatch.setattr(viz, "FIGURES", tmp_path / "figs")
-    assert viz.all_figures() == []
+    assert viz.all_figures(run_dir=tmp_path / "no_such_run") == []
 
 
 def test_method_comparison_figure_is_written(tables, tmp_path, monkeypatch):

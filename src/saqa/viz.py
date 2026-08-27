@@ -251,15 +251,25 @@ def plot_attribution_map(attribution: np.ndarray, truth_joint: np.ndarray,
     return _save(fig, name)
 
 
-def all_figures() -> list[Path]:
-    """Draw every table-driven figure that has data behind it."""
+def all_figures(run_dir: str | Path = "results/runs/saqa_stgcn") -> list[Path]:
+    """Draw every table-driven figure that has data behind it.
+
+    Args:
+        run_dir: The run whose ``per_item.csv`` supplies the risk-coverage curve.
+            Parameterised rather than hard-coded so a caller can point at another
+            run -- and so the tests can point at an empty directory and assert
+            that a missing artefact produces no figure instead of a blank one.
+
+    Returns:
+        The paths written. Empty when no table has data behind it yet.
+    """
     out = []
     for fn in (plot_method_comparison, plot_attribution_fidelity, plot_cost_curve,
                plot_efficiency, plot_data_efficiency):
         path = fn()
         if path is not None:
             out.append(path)
-    rc = plot_risk_coverage("results/runs/saqa_stgcn/per_item.csv")
+    rc = plot_risk_coverage(str(Path(run_dir) / "per_item.csv"))
     if rc is not None:
         out.append(rc)
     return out
