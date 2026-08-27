@@ -118,3 +118,41 @@ error_auroc 0.517961 0.036511 0.476077 0.543068 0.066992     0.051634       3
 ======================================================================
 === stage: ablations
 ======================================================================
+[ablate] full: default
+[ablate] partitions_uniform: ['model.partitions=uniform']
+[ablate] partitions_identity: ['model.partitions=identity']
+[ablate] no_edge_importance: ['model.edge_importance=False']
+[ablate] dense_temporal: ['model.separable=False']
+[ablate] temporal_kernel_3: ['model.temporal_kernel=3']
+[ablate] head_regression: ['model.head=regression']
+[ablate] norm_group: ['model.norm=group']
+[ablate] uncertainty_heteroscedastic: ['model.uncertainty=heteroscedastic']
+
+=== ablations ===
+                    variant                            change  spearman  kendall_tau  relative_l2      mae  coverage  mean_width   params  train_seconds
+                       full                                 -  0.359880     0.245182     0.251779 0.151605     0.888    0.621831  66791.0     115.973314
+         partitions_uniform          model.partitions=uniform  0.458812     0.313371     0.239307 0.144524     0.892    0.584353  43135.0      61.825879
+        partitions_identity         model.partitions=identity  0.402210     0.273210     0.246388 0.146749     0.872    0.566453  43135.0      54.906067
+         no_edge_importance       model.edge_importance=False  0.356500     0.241938     0.252046 0.151814     0.904    0.630598  63323.0      69.999645
+             dense_temporal             model.separable=False  0.351021     0.237007     0.253618 0.155456     0.900    0.627578 194007.0      83.178573
+          temporal_kernel_3           model.temporal_kernel=3  0.382824     0.262181     0.248959 0.151166     0.916    0.643543  65399.0      81.606756
+            head_regression             model.head=regression  0.390308     0.270291     0.258508 0.148480     0.884    0.566488  66782.0      93.087787
+                 norm_group                  model.norm=group  0.074551     0.048985     0.266508 0.164473     0.944    0.642073  66791.0      88.990582
+uncertainty_heteroscedastic model.uncertainty=heteroscedastic  0.353275     0.239019     0.249227 0.155154     0.904    0.548213  66694.0      92.737869
+
+=== ablation deltas against the run-to-run noise scale ===
+                    variant  spearman  spearman_delta  spearman_ratio_to_noise spearman_verdict
+                       full  0.359880        0.000000                 0.000000     inside noise
+         partitions_uniform  0.458812        0.098932                 0.820908     inside noise
+        partitions_identity  0.402210        0.042330                 0.351244     inside noise
+         no_edge_importance  0.356500       -0.003380                 0.028047     inside noise
+             dense_temporal  0.351021       -0.008859                 0.073508     inside noise
+          temporal_kernel_3  0.382824        0.022944                 0.190385     inside noise
+            head_regression  0.390308        0.030428                 0.252484     inside noise
+                 norm_group  0.074551       -0.285329                 2.367577         survives
+uncertainty_heteroscedastic  0.353275       -0.006606                 0.054811     inside noise
+=== stage ablations finished in 13.0 min (exit 0)
+
+======================================================================
+=== stage: splits
+======================================================================

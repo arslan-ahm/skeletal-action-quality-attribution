@@ -415,12 +415,61 @@ carries its own `full` reference row, so it is internally consistent; do not
 compare its absolute numbers against §2.
 
 <!-- table:ablation -->
-_not measured_
+| variant | change | spearman | spearman_delta | spearman_ratio_to_noise | spearman_verdict | params |
+|---|---|---|---|---|---|---|
+| full | - | 0.3599 | 0 | 0 | inside noise | 66791 |
+| partitions_uniform | model.partitions=uniform | 0.4588 | 0.0989 | 0.8209 | inside noise | 43135 |
+| partitions_identity | model.partitions=identity | 0.4022 | 0.0423 | 0.3512 | inside noise | 43135 |
+| no_edge_importance | model.edge_importance=False | 0.3565 | -0.0034 | 0.028 | inside noise | 63323 |
+| dense_temporal | model.separable=False | 0.351 | -0.0089 | 0.0735 | inside noise | 1.94e+05 |
+| temporal_kernel_3 | model.temporal_kernel=3 | 0.3828 | 0.0229 | 0.1904 | inside noise | 65399 |
+| head_regression | model.head=regression | 0.3903 | 0.0304 | 0.2525 | inside noise | 66782 |
+| norm_group | model.norm=group | 0.0746 | -0.2853 | 2.3676 | survives | 66791 |
+| uncertainty_heteroscedastic | model.uncertainty=heteroscedastic | 0.3533 | -0.0066 | 0.0548 | inside noise | 66694 |
 <!-- /table -->
 
 Every delta is divided by the §5 noise scale before it is interpreted. A verdict
 of `inside noise` means the ablation did not measure anything at this scale, not
 that the component does nothing.
+
+### 6.1 One component matters, and it is the normalisation
+
+**`norm_group` is the only variant that survives**: Spearman 0.075 against 0.360
+for the default, a delta of −0.285 at **2.37x the run-to-run scale**. This
+reproduces, like-for-like at the shipped configuration, the finding recorded in
+`docs/METHOD.md` §4.3 — GroupNorm removes the per-sample channel scale that the
+global average-pooling readout reads, and the model becomes nearly unable to
+learn. It is the single largest effect anywhere in this repository.
+
+### 6.2 Everything else is inside the noise, including the graph
+
+That has to be said plainly, because it undercuts the architecture this project
+proposes:
+
+* **`partitions_identity`** — self-loops only, *no message passing between joints
+  at all* — scores **0.402 against the full model's 0.360**, using 43k parameters
+  instead of 67k. At 0.35x the noise scale this is not evidence that removing the
+  graph *helps*; it is decisive evidence that at this scale the graph is not
+  measurably helping either.
+* **`partitions_uniform`** (one undirected partition instead of three) scores
+  0.459, 0.82x the noise. The centripetal/centrifugal split of Yan et al. (2018)
+  buys nothing measurable here and costs 55% more parameters.
+* **`dense_temporal`** costs 2.9x the parameters for a delta of −0.009 (0.07x
+  noise). This is the one *supportive* reading available: the separable temporal
+  stage is 2.9x cheaper at no measurable cost in accuracy — though "no measurable
+  cost" at this noise level is a weak statement, and it is the same statement in
+  both directions.
+* **`head_regression`** scores 0.390 against the ordinal head's 0.360 (0.25x
+  noise). The ordinal head is not bought for accuracy; it is bought for the rank
+  consistency in §4.1, which it does deliver.
+* **`temporal_kernel_3`**, **`no_edge_importance`** and
+  **`uncertainty_heteroscedastic`** are all ≤0.26x the noise.
+
+**The honest summary of this table is that one variable — the normalisation —
+accounts for everything measurable, and the graph structure that motivates the
+architecture does not show up above the noise floor at this scale.** With one run
+per variant and a noise scale of 0.12, this experiment can only detect effects
+larger than about 0.24 Spearman, and only one is.
 
 ## 7. Splits, and the leakage this repository measures rather than assumes
 
