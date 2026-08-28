@@ -17,6 +17,15 @@ estimate, a predictive interval, and a map of *which joints in which movement
 phase cost the quality*. Then it does the thing attribution work usually skips:
 **it measures whether that map is correct.**
 
+**Efficiency axis: parameters and inference latency.** **45.3× fewer parameters**
+(0.067 M against 3.024 M), **51.5× fewer MACs**, and **6.18× lower latency**
+(12.23 ms against 75.62 ms, batch 1, CPU) than the reference-scale ST-GCN
+(`results/tables/efficiency.csv`, warm-up 12, 40 repeats, median and IQR).
+**What that costs:** at 48 frames the DTW baseline it replaces is still **1.47×
+faster** (7.30 ms against 10.72 ms) and only loses somewhere between 48 and 96
+frames (`results/tables/cost_vs_length.csv`) — the win is asymptotic, not
+universal.
+
 > **Result, up front — and it is not the flattering one.**
 >
 > **The measurement machinery works and the mechanism guarantees hold.**
