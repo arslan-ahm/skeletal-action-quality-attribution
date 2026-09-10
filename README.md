@@ -6,6 +6,10 @@
 
 # What Should I Change? — Skeletal Action-Quality Attribution
 
+<!-- links:begin -->
+**[Live results and figures](https://action-quality-attribution-arslan.surge.sh)** &nbsp;·&nbsp; **[Source](https://github.com/arslan-ahm/skeletal-action-quality-attribution)** &nbsp;·&nbsp; [All seven projects](https://seven-ai-projects-arslan.surge.sh)
+<!-- links:end -->
+
 **Reference-free, calibrated action-quality regression with per-joint,
 per-phase attribution that is *validated against ground truth*.**
 
