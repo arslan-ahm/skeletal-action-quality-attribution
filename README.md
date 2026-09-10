@@ -7,7 +7,9 @@
 # What Should I Change? — Skeletal Action-Quality Attribution
 
 <!-- links:begin -->
-**[Live results and figures](https://action-quality-attribution-arslan.surge.sh)** &nbsp;·&nbsp; **[Source](https://github.com/arslan-ahm/skeletal-action-quality-attribution)** &nbsp;·&nbsp; [All seven projects](https://seven-ai-projects-arslan.surge.sh)
+**[▶ Try the live demo](https://huggingface.co/spaces/ARslan-Ahamd/skeletal-action-quality-attribution)** &nbsp;·&nbsp; **[Full results](https://action-quality-attribution-arslan.surge.sh)** &nbsp;·&nbsp; [All seven projects](https://seven-ai-projects-arslan.surge.sh)
+
+<sub>The demo runs this repository's own code in your browser via Pyodide — no server, nothing uploaded.</sub>
 <!-- links:end -->
 
 > **Reference-free, calibrated action-quality regression with per-joint,
